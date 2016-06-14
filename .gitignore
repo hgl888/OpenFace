@@ -24,3 +24,7 @@ Release/AU_predictors/
 Release/
 exe/Recording/recording/
 ipch/
+videos/
+*.opensdf
+Debug/
+*.suo
