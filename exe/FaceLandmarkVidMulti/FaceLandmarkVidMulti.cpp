@@ -317,7 +317,7 @@ int main (int argc, char **argv)
 			// Keep only non overlapping detections (also convert to a concurrent vector
 			NonOverlapingDetections(clnf_models, face_detections);
 
-			vector<tbb::atomic<bool> > face_detections_used(face_detections.size());
+			vector<bool> face_detections_used(face_detections.size());
 
 			// Go through every model and update the tracking
 			//tbb::parallel_for(0, (int)clnf_models.size(), [&](int model){
@@ -341,7 +341,7 @@ int main (int argc, char **argv)
 					for(size_t detection_ind = 0; detection_ind < face_detections.size(); ++detection_ind)
 					{
 						// if it was not taken by another tracker take it (if it is false swap it to true and enter detection, this makes it parallel safe)
-						if(face_detections_used[detection_ind].compare_and_swap(true, false) == false)
+						if(face_detections_used[detection_ind] == false)
 						{
 					
 							// Reinitialise the model

@@ -11,7 +11,7 @@
 #include "../array2d.h"
 #include "object_detector.h"
 
-#include <tbb/tbb.h>
+//#include <tbb/tbb.h>
 
 namespace dlib
 {
@@ -512,7 +512,8 @@ namespace dlib
 
 				i = start_filter;
 
-				tbb::parallel_for((int)i, (int)w.row_filters.size(), [&](int k)
+				//tbb::parallel_for((int)i, (int)w.row_filters.size(), [&](int k)
+				for (int k = i; k < w.row_filters.size(); ++k )
 				{
 					array2d<float> saliency_tmp;
 					array2d<float> scratch;
@@ -521,7 +522,7 @@ namespace dlib
 						area = float_spatially_filter_image_separable(feats[k], saliency_tmp, w.row_filters[k][j], w.col_filters[k][j], scratch, false);
 						swap(saliency_tmp, saliency_images[filters_before[k]-start_filter+j]);
                     }
-                });
+                }//);
 				
                 saliency_image.clear();
 
@@ -751,7 +752,9 @@ namespace dlib
 				swap(temp, image_pyramid[pyr_level]);
 			}
 
-			tbb::parallel_for(0, (int)levels, [&](int pyr_level){
+			//tbb::parallel_for(0, (int)levels, [&](int pyr_level)
+			for (int pyr_level = 0; pyr_level < levels; ++pyr_level )
+			{
 				if(pyr_level == 0)
 				{
 					fe(img, feats[pyr_level], cell_size,filter_rows_padding,filter_cols_padding);
@@ -760,7 +763,7 @@ namespace dlib
 				{
 					fe(image_pyramid[pyr_level-1], feats[pyr_level], cell_size,filter_rows_padding,filter_cols_padding);
 				}
-			});
+			}//);
         }
 
     }
@@ -984,12 +987,13 @@ namespace dlib
 
             pyramid_type pyr;
 
-			tbb::concurrent_vector<std::pair<double, rectangle>> dets_conc;
+			std::vector<std::pair<double, rectangle>> dets_conc;
 
 			int num_features = feats.size();
 
-			tbb::parallel_for(0, num_features, [&](int l){
-
+			//tbb::parallel_for(0, num_features, [&](int l)
+			for (int l = 0; l < num_features; ++l )
+			{
 				array2d<float> saliency_image;
 
 				//const rectangle area = apply_filters_to_fhog(w, feats[l], saliency_image);
@@ -1012,7 +1016,7 @@ namespace dlib
                         }
                     }
                 }
-			});	
+			}//);	
 
 			for(size_t i = 0; i < dets_conc.size(); ++i)
 			{
