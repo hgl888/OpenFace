@@ -598,7 +598,8 @@ bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &
 		bool parts_used = false;		
 
 		// Do the hierarchical models in parallel
-		tbb::parallel_for(0, (int)hierarchical_models.size(), [&](int part_model){
+		//tbb::parallel_for(0, (int)hierarchical_models.size(), [&](int part_model){
+		for (int part_model = 0; part_model < hierarchical_models.size(); ++part_model )
 		{
 			// Only do the synthetic eye models if we're doing gaze
 			if (!((hierarchical_model_names[part_model].compare("right_eye_28") == 0 ||
@@ -645,7 +646,7 @@ bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &
 				}
 			}
 		}
-		});
+		//});
 
 		// Recompute main model based on the fit part models
 		if(parts_used)

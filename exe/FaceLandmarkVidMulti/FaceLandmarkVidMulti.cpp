@@ -320,9 +320,9 @@ int main (int argc, char **argv)
 			vector<tbb::atomic<bool> > face_detections_used(face_detections.size());
 
 			// Go through every model and update the tracking
-			tbb::parallel_for(0, (int)clnf_models.size(), [&](int model){
-			//for(unsigned int model = 0; model < clnf_models.size(); ++model)
-			//{
+			//tbb::parallel_for(0, (int)clnf_models.size(), [&](int model){
+			for(unsigned int model = 0; model < clnf_models.size(); ++model)
+			{
 
 				bool detection_success = false;
 
@@ -365,7 +365,8 @@ int main (int argc, char **argv)
 					// The actual facial landmark detection / tracking
 					detection_success = LandmarkDetector::DetectLandmarksInVideo(grayscale_image, depth_image, clnf_models[model], det_parameters[model]);
 				}
-			});
+			}
+			//);
 								
 			// Go through every model and visualise the results
 			for(size_t model = 0; model < clnf_models.size(); ++model)
