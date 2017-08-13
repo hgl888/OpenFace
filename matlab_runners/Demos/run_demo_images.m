@@ -1,8 +1,11 @@
 clear
-
-clm_exe = '"../../x64/Release/FaceLandmarkImg.exe"';
+if(isunix)
+    executable = '"../../build/bin/FaceLandmarkImg"';
+else
+    executable = '"../../x64/Release/FaceLandmarkImg.exe"';
+end
     
-in_dir  = '../../videos/';
+in_dir  = '../../samples/';
 out_dir = './demo_img/';
 
 if(~exist(out_dir, 'file'))
@@ -22,7 +25,7 @@ model = 'model/main_clnf_general.txt';
 % Trained on in-the-wild
 %model = 'model/main_clnf_wild.txt';
 
-command = clm_exe;
+command = executable;
 
 command = cat(2, command, [' -fdir "' in_dir '"']);
 
@@ -38,4 +41,8 @@ command = cat(2, command, [' -mloc "', model, '"']);
 % Comment to skip this functionality
 command = cat(2, command, ' -wild ');
 
-dos(command);
+if(isunix)
+    unix(command);
+else
+    dos(command);
+end

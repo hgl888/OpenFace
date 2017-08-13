@@ -1,4 +1,10 @@
-exe = '"../../x64/Release/FeatureExtraction.exe"';
+clear
+
+if(isunix)
+    executable = '"../../build/bin/FeatureExtraction"';
+else
+    executable = '"../../x64/Release/FeatureExtraction.exe"';
+end
 
 output = './output_features_vid/';
 
@@ -6,18 +12,18 @@ if(~exist(output, 'file'))
     mkdir(output)
 end
     
-in_files = dir('../../videos/2015-10-15-15-14.avi');
+in_files = dir('../../samples/2015-10-15-15-14.avi');
 % some parameters
 verbose = true;
 
-command = exe;
+command = executable;
 command = cat(2, command, ' -verbose  -no2Dfp -no3Dfp -noMparams -noPose -noAUs ');
 
 % add all videos to single argument list (so as not to load the model anew
 % for every video)
 for i=1:numel(in_files)
     
-    inputFile = ['../../videos/', in_files(i).name];
+    inputFile = ['../../samples/', in_files(i).name];
     [~, name, ~] = fileparts(inputFile);
     
     % where to output tracking results
@@ -31,7 +37,11 @@ for i=1:numel(in_files)
                
 end
 
-dos(command);
+if(isunix)
+    unix(command);
+else
+    dos(command);
+end
 
 %% Demonstrating reading the output files
 filename = [output name];

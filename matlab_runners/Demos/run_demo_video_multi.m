@@ -1,4 +1,10 @@
-clm_exe = '"../../x64/Release/FaceLandmarkVidMulti.exe"';
+clear;
+
+if(isunix)
+    executable = '"../../build/bin/FaceLandmarkVidMulti"';
+else
+    executable = '"../../x64/Release/FaceLandmarkVidMulti.exe"';
+end
 
 output = './demo_vid/';
 
@@ -6,7 +12,7 @@ if(~exist(output, 'file'))
     mkdir(output)
 end
     
-in_files = dir('../../videos/multi_face.avi');
+in_files = dir('../../samples/multi_face.avi');
 % some parameters
 verbose = true;
 
@@ -20,13 +26,13 @@ model = 'model/main_clnf_general.txt';
 % Trained on in-the-wild
 %model = 'model/main_clnf_wild.txt';
 
-command = clm_exe;
+command = executable;
 command = cat(2, command, [' -mloc "', model, '"']);
 % add all videos to single argument list (so as not to load the model anew
 % for every video)
 for i=1:numel(in_files)
     
-    inputFile = ['../../videos/', in_files(i).name];
+    inputFile = ['../../samples/', in_files(i).name];
     [~, name, ~] = fileparts(inputFile);
     
     command = cat(2, command, [' -f "' inputFile '" ']);
@@ -38,4 +44,8 @@ for i=1:numel(in_files)
                  
 end
 
-dos(command);
+if(isunix)
+    unix(command);
+else
+    dos(command);
+end

@@ -1,37 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016, Carnegie Mellon University and University of Cambridge,
+// Copyright (C) 2017, Carnegie Mellon University and University of Cambridge,
 // all rights reserved.
 //
-// THIS SOFTWARE IS PROVIDED “AS IS” FOR ACADEMIC USE ONLY AND ANY EXPRESS
-// OR IMPLIED WARRANTIES WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY.
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY
 //
-// Notwithstanding the license granted herein, Licensee acknowledges that certain components
-// of the Software may be covered by so-called “open source” software licenses (“Open Source
-// Components”), which means any software licenses approved as open source licenses by the
-// Open Source Initiative or any substantially similar licenses, including without limitation any
-// license that, as a condition of distribution of the software licensed under such license,
-// requires that the distributor make the software available in source code format. Licensor shall
-// provide a list of Open Source Components for a particular version of the Software upon
-// Licensee’s request. Licensee will comply with the applicable terms of such licenses and to
-// the extent required by the licenses covering Open Source Components, the terms of such
-// licenses will apply in lieu of the terms of this Agreement. To the extent the terms of the
-// licenses applicable to Open Source Components prohibit any of the restrictions in this
-// License Agreement with respect to such Open Source Component, such restrictions will not
-// apply to such Open Source Component. To the extent the terms of the licenses applicable to
-// Open Source Components require Licensor to make an offer to provide source code or
-// related information in connection with the Software, such offer is hereby made. Any request
-// for source code or related information should be directed to cl-face-tracker-distribution@lists.cam.ac.uk
-// Licensee acknowledges receipt of notices for the Open Source Components for the initial
-// delivery of the Software.
+// BY USING OR DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO THE TERMS OF THIS LICENSE AGREEMENT.  
+// IF YOU DO NOT AGREE WITH THESE TERMS, YOU MAY NOT USE OR DOWNLOAD THE SOFTWARE.
+//
+// License can be found in OpenFace-license.txt
 
 //     * Any publications arising from the use of this software, including but
 //       not limited to academic journal and conference publications, technical
@@ -77,6 +53,10 @@
 
 #include <FaceAnalyser.h>
 #include <GazeEstimation.h>
+
+#ifndef CONFIG_DIR
+#define CONFIG_DIR "~"
+#endif
 
 using namespace std;
 
@@ -188,26 +168,64 @@ void write_out_pose_landmarks(const string& outfeatures, const cv::Mat_<double>&
 	}
 }
 
-void write_out_landmarks(const string& outfeatures, const LandmarkDetector::CLNF& clnf_model)
+void write_out_landmarks(const string& outfeatures, const LandmarkDetector::CLNF& clnf_model, const cv::Vec6d& pose, const cv::Point3f& gaze0, const cv::Point3f& gaze1, std::vector<std::pair<std::string, double>> au_intensities, std::vector<std::pair<std::string, double>> au_occurences)
 {
 	create_directory_from_file(outfeatures);
 	std::ofstream featuresFile;
-	featuresFile.open(outfeatures);		
+	featuresFile.open(outfeatures);
 
-	if(featuresFile.is_open())
-	{	
+	if (featuresFile.is_open())
+	{
 		int n = clnf_model.patch_experts.visibilities[0][0].rows;
 		featuresFile << "version: 1" << endl;
 		featuresFile << "npoints: " << n << endl;
 		featuresFile << "{" << endl;
-		
-		for (int i = 0; i < n; ++ i)
+
+		for (int i = 0; i < n; ++i)
 		{
 			// Use matlab format, so + 1
-			featuresFile << clnf_model.detected_landmarks.at<double>(i) + 1 << " " << clnf_model.detected_landmarks.at<double>(i+n) + 1 << endl;
+			featuresFile << clnf_model.detected_landmarks.at<double>(i) + 1 << " " << clnf_model.detected_landmarks.at<double>(i + n) + 1 << endl;
 		}
-		featuresFile << "}" << endl;		
+		featuresFile << "}" << endl;
 
+		// Do the pose and eye gaze if present as well
+		featuresFile << "pose: eul_x, eul_y, eul_z: " << endl;
+		featuresFile << "{" << endl;
+		featuresFile << pose[3] << " " << pose[4] << " " << pose[5] << endl;
+		featuresFile << "}" << endl;
+
+		// Do the pose and eye gaze if present as well
+		featuresFile << "gaze: dir_x_1, dir_y_1, dir_z_1, dir_x_2, dir_y_2, dir_z_2: " << endl;
+		featuresFile << "{" << endl;
+		featuresFile << gaze0.x << " " << gaze0.y << " " << gaze0.z << " " << gaze1.x << " " << gaze1.y << " " << gaze1.z << endl;
+		featuresFile << "}" << endl;
+
+		// Do the au intensities
+		featuresFile << "au intensities: " << au_intensities.size() << endl;
+		featuresFile << "{" << endl;
+
+		for (size_t i = 0; i < au_intensities.size(); ++i)
+		{
+			// Use matlab format, so + 1
+			featuresFile << au_intensities[i].first << " " << au_intensities[i].second << endl;
+		}
+
+		featuresFile << "}" << endl;
+
+		// Do the au occurences
+		featuresFile << "au occurences: " << au_occurences.size() << endl;
+		featuresFile << "{" << endl;
+
+		for (size_t i = 0; i < au_occurences.size(); ++i)
+		{
+			// Use matlab format, so + 1
+			featuresFile << au_occurences[i].first << " " << au_occurences[i].second << endl;
+		}
+
+		featuresFile << "}" << endl;
+
+
+		featuresFile.close();
 	}
 }
 
@@ -279,13 +297,17 @@ int main (int argc, char **argv)
 	//Convert arguments to more convenient vector form
 	vector<string> arguments = get_arguments(argc, argv);
 
+	// Search paths
+	boost::filesystem::path config_path = boost::filesystem::path(CONFIG_DIR);
+	boost::filesystem::path parent_path = boost::filesystem::path(arguments[0]).parent_path();
+
 	// Some initial parameters that can be overriden from command line
-	vector<string> files, depth_files, output_images, output_landmark_locations, output_pose_locations;
+	vector<string> files, output_images, output_landmark_locations, output_pose_locations;
 
 	// Bounding boxes for a face in each image (optional)
 	vector<cv::Rect_<double> > bounding_boxes;
 	
-	LandmarkDetector::get_image_input_output_params(files, depth_files, output_landmark_locations, output_pose_locations, output_images, bounding_boxes, arguments);
+	LandmarkDetector::get_image_input_output_params(files, output_landmark_locations, output_pose_locations, output_images, bounding_boxes, arguments);
 	LandmarkDetector::FaceModelParameters det_parameters(arguments);	
 	// No need to validate detections, as we're not doing tracking
 	det_parameters.validate_detections = false;
@@ -315,6 +337,51 @@ int main (int argc, char **argv)
 	cv::CascadeClassifier classifier(det_parameters.face_detector_location);
 	dlib::frontal_face_detector face_detector_hog = dlib::get_frontal_face_detector();
 
+	// Loading the AU prediction models
+	string au_loc = "AU_predictors/AU_all_static.txt";
+
+	boost::filesystem::path au_loc_path = boost::filesystem::path(au_loc);
+	if (boost::filesystem::exists(au_loc_path))
+	{
+		au_loc = au_loc_path.string();
+	}
+	else if (boost::filesystem::exists(parent_path/au_loc_path))
+	{
+		au_loc = (parent_path/au_loc_path).string();
+	}
+	else if (boost::filesystem::exists(config_path/au_loc_path))
+	{
+		au_loc = (config_path/au_loc_path).string();
+	}
+	else
+	{
+		cout << "Can't find AU prediction files, exiting" << endl;
+		return 1;
+	}
+
+	// Used for image masking for AUs
+	string tri_loc;
+	boost::filesystem::path tri_loc_path = boost::filesystem::path("model/tris_68_full.txt");
+	if (boost::filesystem::exists(tri_loc_path))
+	{
+		tri_loc = tri_loc_path.string();
+	}
+	else if (boost::filesystem::exists(parent_path/tri_loc_path))
+	{
+		tri_loc = (parent_path/tri_loc_path).string();
+	}
+	else if (boost::filesystem::exists(config_path/tri_loc_path))
+	{
+		tri_loc = (config_path/tri_loc_path).string();
+	}
+	else
+	{
+		cout << "Can't find triangulation files, exiting" << endl;
+		return 1;
+	}
+
+	FaceAnalysis::FaceAnalyser face_analyser(vector<cv::Vec3d>(), 0.7, 112, 112, au_loc, tri_loc);
+
 	bool visualise = !det_parameters.quiet_mode;
 
 	// Do some image loading
@@ -325,16 +392,12 @@ int main (int argc, char **argv)
 		// Loading image
 		cv::Mat read_image = cv::imread(file, -1);
 
-		// Loading depth file if exists (optional)
-		cv::Mat_<float> depth_image;
-
-		if(depth_files.size() > 0)
+		if (read_image.empty())
 		{
-			string dFile = depth_files.at(i);
-			cv::Mat dTemp = cv::imread(dFile, -1);
-			dTemp.convertTo(depth_image, CV_32F);
+			cout << "Could not read the input image" << endl;
+			return 1;
 		}
-
+		
 		// Making sure the image is in uchar grayscale
 		cv::Mat_<uchar> grayscale_image;
 		convert_to_grayscale(read_image, grayscale_image);
@@ -380,7 +443,7 @@ int main (int argc, char **argv)
 			for(size_t face=0; face < face_detections.size(); ++face)
 			{
 				// if there are multiple detections go through them
-				bool success = LandmarkDetector::DetectLandmarksInImage(grayscale_image, depth_image, face_detections[face], clnf_model, det_parameters);
+				bool success = LandmarkDetector::DetectLandmarksInImage(grayscale_image, face_detections[face], clnf_model, det_parameters);
 
 				// Estimate head pose and eye gaze				
 				cv::Vec6d headPose = LandmarkDetector::GetCorrectedPoseWorld(clnf_model, fx, fy, cx, cy);
@@ -395,6 +458,8 @@ int main (int argc, char **argv)
 					FaceAnalysis::EstimateGaze(clnf_model, gazeDirection1, fx, fy, cx, cy, false);
 
 				}
+
+				auto ActionUnits = face_analyser.PredictStaticAUs(read_image, clnf_model, false);
 
 				// Writing out the detected landmarks (in an OS independent manner)
 				if(!output_landmark_locations.empty())
@@ -412,7 +477,7 @@ int main (int argc, char **argv)
 					boost::filesystem::path fname = out_feat_path.filename().replace_extension("");
 					boost::filesystem::path ext = out_feat_path.extension();
 					string outfeatures = dir.string() + preferredSlash + fname.string() + string(name) + ext.string();
-					write_out_landmarks(outfeatures, clnf_model);
+					write_out_landmarks(outfeatures, clnf_model, headPose, gazeDirection0, gazeDirection1, ActionUnits.first, ActionUnits.second);
 				}
 
 				if (!output_pose_locations.empty())
@@ -472,8 +537,14 @@ int main (int argc, char **argv)
 						boost::filesystem::path ext = out_feat_path.extension();
 						outimage = dir.string() + preferredSlash + fname.string() + string(name) + ext.string();
 						create_directory_from_file(outimage);
-						imwrite(outimage, display_image);	
+						bool write_success = cv::imwrite(outimage, display_image);	
 						
+						if (!write_success)
+						{
+							cout << "Could not output a processed image" << endl;
+							return 1;
+						}
+
 					}
 
 				}
@@ -503,11 +574,13 @@ int main (int argc, char **argv)
 				FaceAnalysis::EstimateGaze(clnf_model, gazeDirection1, fx, fy, cx, cy, false);
 			}
 
+			auto ActionUnits = face_analyser.PredictStaticAUs(read_image, clnf_model, false);
+
 			// Writing out the detected landmarks
 			if(!output_landmark_locations.empty())
 			{
 				string outfeatures = output_landmark_locations.at(i);
-				write_out_landmarks(outfeatures, clnf_model);
+				write_out_landmarks(outfeatures, clnf_model, headPose, gazeDirection0, gazeDirection1, ActionUnits.first, ActionUnits.second);
 			}
 
 			// Writing out the detected landmarks
@@ -543,7 +616,13 @@ int main (int argc, char **argv)
 				if(!outimage.empty())
 				{
 					create_directory_from_file(outimage);
-					imwrite(outimage, display_image);	
+					bool write_success = imwrite(outimage, display_image);	
+
+					if (!write_success)
+					{
+						cout << "Could not output a processed image" << endl;
+						return 1;
+					}
 				}
 			}
 		}				

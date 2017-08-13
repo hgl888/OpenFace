@@ -1,8 +1,6 @@
 % This is sort of the unit test for the whole module (needs datasets)
-% Will take over an hour to run all
-
-% TODO need some unit testy things, some asserts
-
+% Will take several hours to run all
+clear
 tic
 %% Head pose
 cd('Head Pose Experiments');
@@ -14,7 +12,7 @@ cd('../');
 
 %% Features
 cd('Feature Point Experiments');
-run_clm_feature_point_tests_wild;
+run_OpenFace_feature_point_tests_300W;
 assert(median(err_clnf) < 0.041);
 assert(median(err_clnf_wild) < 0.041);
 run_yt_dataset;
@@ -24,13 +22,21 @@ cd('../');
 %% AUs
 cd('Action Unit Experiments');
 run_AU_prediction_DISFA
-assert(mean(au_res) > 0.6);
+assert(mean(au_res) > 0.7);
+
+run_AU_prediction_SEMAINE
+assert(mean(f1s) > 0.41);
+
+run_AU_prediction_FERA2011
+assert(mean(au_res) > 0.5);
+
 cd('../');
 
 %% Gaze
 cd('Gaze Experiments');
 extract_mpii_gaze_test
-assert(median_error < 9.5)
+assert(mean_error < 9.5)
+assert(median_error < 9.0)
 cd('../');
 
 %% Demos

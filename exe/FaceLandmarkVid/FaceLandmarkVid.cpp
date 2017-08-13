@@ -1,37 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016, Carnegie Mellon University and University of Cambridge,
+// Copyright (C) 2017, Carnegie Mellon University and University of Cambridge,
 // all rights reserved.
 //
-// THIS SOFTWARE IS PROVIDED “AS IS” FOR ACADEMIC USE ONLY AND ANY EXPRESS
-// OR IMPLIED WARRANTIES WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY.
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY
 //
-// Notwithstanding the license granted herein, Licensee acknowledges that certain components
-// of the Software may be covered by so-called “open source” software licenses (“Open Source
-// Components”), which means any software licenses approved as open source licenses by the
-// Open Source Initiative or any substantially similar licenses, including without limitation any
-// license that, as a condition of distribution of the software licensed under such license,
-// requires that the distributor make the software available in source code format. Licensor shall
-// provide a list of Open Source Components for a particular version of the Software upon
-// Licensee’s request. Licensee will comply with the applicable terms of such licenses and to
-// the extent required by the licenses covering Open Source Components, the terms of such
-// licenses will apply in lieu of the terms of this Agreement. To the extent the terms of the
-// licenses applicable to Open Source Components prohibit any of the restrictions in this
-// License Agreement with respect to such Open Source Component, such restrictions will not
-// apply to such Open Source Component. To the extent the terms of the licenses applicable to
-// Open Source Components require Licensor to make an offer to provide source code or
-// related information in connection with the Software, such offer is hereby made. Any request
-// for source code or related information should be directed to cl-face-tracker-distribution@lists.cam.ac.uk
-// Licensee acknowledges receipt of notices for the Open Source Components for the initial
-// delivery of the Software.
+// BY USING OR DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO THE TERMS OF THIS LICENSE AGREEMENT.  
+// IF YOU DO NOT AGREE WITH THESE TERMS, YOU MAY NOT USE OR DOWNLOAD THE SOFTWARE.
+//
+// License can be found in OpenFace-license.txt
 
 //     * Any publications arising from the use of this software, including but
 //       not limited to academic journal and conference publications, technical
@@ -111,7 +87,7 @@ double fps_tracker = -1.0;
 int64 t0 = 0;
 
 // Visualising the results
-void visualise_tracking(cv::Mat& captured_image, cv::Mat_<float>& depth_image, const LandmarkDetector::CLNF& face_model, const LandmarkDetector::FaceModelParameters& det_parameters, cv::Point3f gazeDirection0, cv::Point3f gazeDirection1, int frame_count, double fx, double fy, double cx, double cy)
+void visualise_tracking(cv::Mat& captured_image, const LandmarkDetector::CLNF& face_model, const LandmarkDetector::FaceModelParameters& det_parameters, cv::Point3f gazeDirection0, cv::Point3f gazeDirection1, int frame_count, double fx, double fy, double cx, double cy)
 {
 
 	// Drawing the facial landmarks on the face and the bounding box around it if tracking is successful and initialised
@@ -166,13 +142,6 @@ void visualise_tracking(cv::Mat& captured_image, cv::Mat_<float>& depth_image, c
 	{
 		cv::namedWindow("tracking_result", 1);
 		cv::imshow("tracking_result", captured_image);
-
-		if (!depth_image.empty())
-		{
-			// Division needed for visualisation purposes
-			imshow("depth", depth_image / 2000.0);
-		}
-
 	}
 }
 
@@ -182,7 +151,7 @@ int main (int argc, char **argv)
 	vector<string> arguments = get_arguments(argc, argv);
 
 	// Some initial parameters that can be overriden from command line	
-	vector<string> files, depth_directories, output_video_files, out_dummy;
+	vector<string> files, output_video_files, out_dummy;
 	
 	// By default try webcam 0
 	int device = 0;
@@ -193,7 +162,8 @@ int main (int argc, char **argv)
 	
 	// Indicates that rotation should be with respect to world or camera coordinates
 	bool u;
-	LandmarkDetector::get_video_input_output_params(files, depth_directories, out_dummy, output_video_files, u, arguments);
+	string output_codec;
+	LandmarkDetector::get_video_input_output_params(files, out_dummy, output_video_files, u, output_codec, arguments);
 	
 	// The modules that are being used for tracking
 	LandmarkDetector::CLNF clnf_model(det_parameters.model_location);	
@@ -238,8 +208,6 @@ int main (int argc, char **argv)
 			f_n = 0;
 		}
 		
-		bool use_depth = !depth_directories.empty();	
-
 		// Do some grabbing
 		cv::VideoCapture video_capture;
 		if( current_file.size() > 0 )
@@ -247,6 +215,7 @@ int main (int argc, char **argv)
 			if (!boost::filesystem::exists(current_file))
 			{
 				FATAL_STREAM("File does not exist");
+				return 1;
 			}
 
 			current_file = boost::filesystem::path(current_file).generic_string();
@@ -264,7 +233,11 @@ int main (int argc, char **argv)
 			video_capture >> captured_image;
 		}
 
-		if( !video_capture.isOpened() ) FATAL_STREAM( "Failed to open video source" );
+		if (!video_capture.isOpened())
+		{
+			FATAL_STREAM("Failed to open video source");
+			return 1;
+		}
 		else INFO_STREAM( "Device or file opened");
 
 		cv::Mat captured_image;
@@ -292,7 +265,14 @@ int main (int argc, char **argv)
 		cv::VideoWriter writerFace;
 		if (!output_video_files.empty())
 		{
-			writerFace = cv::VideoWriter(output_video_files[f_n], CV_FOURCC('D', 'I', 'V', 'X'), 30, captured_image.size(), true);
+			try
+ 			{
+				writerFace = cv::VideoWriter(output_video_files[f_n], CV_FOURCC(output_codec[0], output_codec[1], output_codec[2], output_codec[3]), 30, captured_image.size(), true);
+			}
+			catch(cv::Exception e)
+			{
+				WARN_STREAM( "Could not open VideoWriter, OUTPUT FILE WILL NOT BE WRITTEN. Currently using codec " << output_codec << ", try using an other one (-oc option)");
+			}
 		}
 
 		// Use for timestamping if using a webcam
@@ -303,7 +283,6 @@ int main (int argc, char **argv)
 		{		
 
 			// Reading the images
-			cv::Mat_<float> depth_image;
 			cv::Mat_<uchar> grayscale_image;
 
 			if(captured_image.channels() == 3)
@@ -314,31 +293,9 @@ int main (int argc, char **argv)
 			{
 				grayscale_image = captured_image.clone();				
 			}
-		
-			// Get depth image
-			if(use_depth)
-			{
-				char* dst = new char[100];
-				std::stringstream sstream;
-
-				sstream << depth_directories[f_n] << "\\depth%05d.png";
-				sprintf(dst, sstream.str().c_str(), frame_count + 1);
-				// Reading in 16-bit png image representing depth
-				cv::Mat_<short> depth_image_16_bit = cv::imread(string(dst), -1);
-
-				// Convert to a floating point depth image
-				if(!depth_image_16_bit.empty())
-				{
-					depth_image_16_bit.convertTo(depth_image, CV_32F);
-				}
-				else
-				{
-					WARN_STREAM( "Can't find depth image" );
-				}
-			}
-			
+					
 			// The actual facial landmark detection / tracking
-			bool detection_success = LandmarkDetector::DetectLandmarksInVideo(grayscale_image, depth_image, clnf_model, det_parameters);
+			bool detection_success = LandmarkDetector::DetectLandmarksInVideo(grayscale_image, clnf_model, det_parameters);
 			
 			// Visualising the results
 			// Drawing the facial landmarks on the face and the bounding box around it if tracking is successful and initialised
@@ -354,7 +311,7 @@ int main (int argc, char **argv)
 				FaceAnalysis::EstimateGaze(clnf_model, gazeDirection1, fx, fy, cx, cy, false);
 			}
 
-			visualise_tracking(captured_image, depth_image, clnf_model, det_parameters, gazeDirection0, gazeDirection1, frame_count, fx, fy, cx, cy);
+			visualise_tracking(captured_image, clnf_model, det_parameters, gazeDirection0, gazeDirection1, frame_count, fx, fy, cx, cy);
 			
 			// output the tracked video
 			if (!output_video_files.empty())

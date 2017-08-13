@@ -1,3 +1,6 @@
+#TBB library
+include_directories(${TBB_ROOT_DIR}/include)
+
 add_executable(FeatureExtraction FeatureExtraction.cpp)
 
 # Local libraries
@@ -11,3 +14,5 @@ target_link_libraries(FeatureExtraction FaceAnalyser)
 target_link_libraries(FeatureExtraction dlib)
 
 target_link_libraries(FeatureExtraction ${OpenCV_LIBS} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
+
+install (TARGETS FeatureExtraction DESTINATION bin)

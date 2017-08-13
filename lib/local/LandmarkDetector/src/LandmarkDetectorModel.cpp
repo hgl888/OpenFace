@@ -1,57 +1,33 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016, Carnegie Mellon University and University of Cambridge,
+// Copyright (C) 2017, Carnegie Mellon University and University of Cambridge,
 // all rights reserved.
 //
-// THIS SOFTWARE IS PROVIDED “AS IS” FOR ACADEMIC USE ONLY AND ANY EXPRESS
-// OR IMPLIED WARRANTIES WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY.
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY
 //
-// Notwithstanding the license granted herein, Licensee acknowledges that certain components
-// of the Software may be covered by so-called “open source” software licenses (“Open Source
-// Components”), which means any software licenses approved as open source licenses by the
-// Open Source Initiative or any substantially similar licenses, including without limitation any
-// license that, as a condition of distribution of the software licensed under such license,
-// requires that the distributor make the software available in source code format. Licensor shall
-// provide a list of Open Source Components for a particular version of the Software upon
-// Licensee’s request. Licensee will comply with the applicable terms of such licenses and to
-// the extent required by the licenses covering Open Source Components, the terms of such
-// licenses will apply in lieu of the terms of this Agreement. To the extent the terms of the
-// licenses applicable to Open Source Components prohibit any of the restrictions in this
-// License Agreement with respect to such Open Source Component, such restrictions will not
-// apply to such Open Source Component. To the extent the terms of the licenses applicable to
-// Open Source Components require Licensor to make an offer to provide source code or
-// related information in connection with the Software, such offer is hereby made. Any request
-// for source code or related information should be directed to cl-face-tracker-distribution@lists.cam.ac.uk
-// Licensee acknowledges receipt of notices for the Open Source Components for the initial
-// delivery of the Software.
-
+// BY USING OR DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO THE TERMS OF THIS LICENSE AGREEMENT.  
+// IF YOU DO NOT AGREE WITH THESE TERMS, YOU MAY NOT USE OR DOWNLOAD THE SOFTWARE.
+//
+// License can be found in OpenFace-license.txt
+//
 //     * Any publications arising from the use of this software, including but
 //       not limited to academic journal and conference publications, technical
 //       reports and manuals, must cite at least one of the following works:
 //
 //       OpenFace: an open source facial behavior analysis toolkit
-//       Tadas Baltrušaitis, Peter Robinson, and Louis-Philippe Morency
+//       Tadas BaltruÅ¡aitis, Peter Robinson, and Louis-Philippe Morency
 //       in IEEE Winter Conference on Applications of Computer Vision, 2016  
 //
 //       Rendering of Eyes for Eye-Shape Registration and Gaze Estimation
-//       Erroll Wood, Tadas Baltrušaitis, Xucong Zhang, Yusuke Sugano, Peter Robinson, and Andreas Bulling 
+//       Erroll Wood, Tadas BaltruÅ¡aitis, Xucong Zhang, Yusuke Sugano, Peter Robinson, and Andreas Bulling 
 //       in IEEE International. Conference on Computer Vision (ICCV),  2015 
 //
 //       Cross-dataset learning and person-speci?c normalisation for automatic Action Unit detection
-//       Tadas Baltrušaitis, Marwa Mahmoud, and Peter Robinson 
+//       Tadas BaltruÅ¡aitis, Marwa Mahmoud, and Peter Robinson 
 //       in Facial Expression Recognition and Analysis Challenge, 
 //       IEEE International Conference on Automatic Face and Gesture Recognition, 2015 
 //
 //       Constrained Local Neural Fields for robust facial landmark detection in the wild.
-//       Tadas Baltrušaitis, Peter Robinson, and Louis-Philippe Morency. 
+//       Tadas BaltruÅ¡aitis, Peter Robinson, and Louis-Philippe Morency. 
 //       in IEEE Int. Conference on Computer Vision Workshops, 300 Faces in-the-Wild Challenge, 2013.    
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,7 +76,7 @@ CLNF::CLNF(const CLNF& other): pdm(other.pdm), params_local(other.params_local.c
 	this->detection_certainty = other.detection_certainty;
 	this->model_likelihood = other.model_likelihood;
 	this->failures_in_a_row = other.failures_in_a_row;
-	
+
 	// Load the CascadeClassifier (as it does not have a proper copy constructor)
 	if(!face_detector_location.empty())
 	{
@@ -267,7 +243,6 @@ void CLNF::Read_CLNF(string clnf_location)
 	string line;
 	
 	vector<string> intensity_expert_locations;
-	vector<string> depth_expert_locations;
 	vector<string> ccnf_expert_locations;
 
 	// The other module locations should be defined as relative paths from the main model
@@ -332,10 +307,6 @@ void CLNF::Read_CLNF(string clnf_location)
 		{
 			intensity_expert_locations.push_back(location);
 		}
-		else if(module.compare("PatchesDepth") == 0)
-		{
-			depth_expert_locations.push_back(location);
-		}
 		else if(module.compare("PatchesCCNF") == 0)
 		{
 			ccnf_expert_locations.push_back(location);
@@ -343,7 +314,7 @@ void CLNF::Read_CLNF(string clnf_location)
 	}
   
 	// Initialise the patch experts
-	patch_experts.Read(intensity_expert_locations, depth_expert_locations, ccnf_expert_locations);
+	patch_experts.Read(intensity_expert_locations, ccnf_expert_locations);
 
 	// Read in a face detector
 	face_detector_HOG = dlib::get_frontal_face_detector();
@@ -366,6 +337,9 @@ void CLNF::Read(string main_location)
 	// The other module locations should be defined as relative paths from the main model
 	boost::filesystem::path root = boost::filesystem::path(main_location).parent_path();	
 
+	// Assume no eye model, unless read-in
+	eye_model = false;
+
 	// The main file contains the references to other files
 	while (!locations.eof())
 	{ 
@@ -386,6 +360,7 @@ void CLNF::Read(string main_location)
 		{
 			location = location.substr(0, location.size()-1);
 		}
+
 
 		// append to root
 		location = (root / location).string();
@@ -584,11 +559,11 @@ void CLNF::Reset(double x, double y)
 }
 
 // The main internal landmark detection call (should not be used externally?)
-bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &depth, FaceModelParameters& params)
+bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, FaceModelParameters& params)
 {
 
 	// Fits from the current estimate of local and global parameters in the model
-	bool fit_success = Fit(image, depth, params.window_sizes_current, params);
+	bool fit_success = Fit(image, params.window_sizes_current, params);
 
 	// Store the landmarks converged on in detected_landmarks
 	pdm.CalcShape2D(detected_landmarks, params_local, params_global);	
@@ -630,14 +605,8 @@ bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &
 					this->hierarchical_params[part_model].window_sizes_current = this->hierarchical_params[part_model].window_sizes_init;
 
 					// Do the actual landmark detection
-					hierarchical_models[part_model].DetectLandmarks(image, depth, hierarchical_params[part_model]);
+					hierarchical_models[part_model].DetectLandmarks(image, hierarchical_params[part_model]);
 
-					// Reincorporate the models into main tracker
-					for (size_t mapping_ind = 0; mapping_ind < mappings.size(); ++mapping_ind)
-					{
-						detected_landmarks.at<double>(mappings[mapping_ind].first) = hierarchical_models[part_model].detected_landmarks.at<double>(mappings[mapping_ind].second);
-						detected_landmarks.at<double>(mappings[mapping_ind].first + pdm.NumberOfPoints()) = hierarchical_models[part_model].detected_landmarks.at<double>(mappings[mapping_ind].second + hierarchical_models[part_model].pdm.NumberOfPoints());
-					}
 				}
 				else
 				{
@@ -650,9 +619,28 @@ bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &
 		// Recompute main model based on the fit part models
 		if(parts_used)
 		{
+
+			for (size_t part_model = 0; part_model < hierarchical_models.size(); ++part_model)
+			{
+				vector<pair<int, int>> mappings = this->hierarchical_mapping[part_model];
+
+				if (!((hierarchical_model_names[part_model].compare("right_eye_28") == 0 ||
+					hierarchical_model_names[part_model].compare("left_eye_28") == 0)
+					&& !params.track_gaze))
+				{
+					// Reincorporate the models into main tracker
+					for (size_t mapping_ind = 0; mapping_ind < mappings.size(); ++mapping_ind)
+					{
+						detected_landmarks.at<double>(mappings[mapping_ind].first) = hierarchical_models[part_model].detected_landmarks.at<double>(mappings[mapping_ind].second);
+						detected_landmarks.at<double>(mappings[mapping_ind].first + pdm.NumberOfPoints()) = hierarchical_models[part_model].detected_landmarks.at<double>(mappings[mapping_ind].second + hierarchical_models[part_model].pdm.NumberOfPoints());
+					}
+				}
+			}
+
 			pdm.CalcParams(params_global, params_local, detected_landmarks);		
 			pdm.CalcShape2D(detected_landmarks, params_local, params_global);
 		}
+
 	}
 
 	// Check detection correctness
@@ -682,7 +670,7 @@ bool CLNF::DetectLandmarks(const cv::Mat_<uchar> &image, const cv::Mat_<float> &
 }
 
 //=============================================================================
-bool CLNF::Fit(const cv::Mat_<uchar>& im, const cv::Mat_<float>& depthImg, const std::vector<int>& window_sizes, const FaceModelParameters& parameters)
+bool CLNF::Fit(const cv::Mat_<uchar>& im, const std::vector<int>& window_sizes, const FaceModelParameters& parameters)
 {
 	// Making sure it is a single channel image
 	assert(im.channels() == 1);	
@@ -691,21 +679,7 @@ bool CLNF::Fit(const cv::Mat_<uchar>& im, const cv::Mat_<float>& depthImg, const
 	cv::Mat_<double> current_shape(2 * pdm.NumberOfPoints() , 1, 0.0);
 
 	int n = pdm.NumberOfPoints(); 
-	
-	cv::Mat_<float> depth_img_no_background;
-	
-	// Background elimination from the depth image
-	if(!depthImg.empty())
-	{
-		bool success = RemoveBackground(depth_img_no_background, depthImg);
-
-		// The attempted background removal can fail leading to tracking failure
-		if(!success)
-		{
-			return false;
-		}
-	}
-
+		
 	int num_scales = patch_experts.patch_scaling.size();
 
 	// Storing the patch expert response maps
@@ -727,15 +701,7 @@ bool CLNF::Fit(const cv::Mat_<uchar>& im, const cv::Mat_<float>& depthImg, const
 			continue;
 
 		// The patch expert response computation
-		if(scale != window_sizes.size() - 1)
-		{
-			patch_experts.Response(patch_expert_responses, sim_ref_to_img, sim_img_to_ref, im, depth_img_no_background, pdm, params_global, params_local, window_size, scale);
-		}
-		else
-		{
-			// Do not use depth for the final iteration as it is not as accurate
-			patch_experts.Response(patch_expert_responses, sim_ref_to_img, sim_img_to_ref, im, cv::Mat(), pdm, params_global, params_local, window_size, scale);
-		}
+		patch_experts.Response(patch_expert_responses, sim_ref_to_img, sim_img_to_ref, im,  pdm, params_global, params_local, window_size, scale);
 		
 		if(parameters.refine_parameters == true)
 		{
@@ -1118,95 +1084,6 @@ double CLNF::NU_RLMS(cv::Vec6d& final_global, cv::Mat_<double>& final_local, con
 
 	return loglhood;
 
-}
-
-
-bool CLNF::RemoveBackground(cv::Mat_<float>& out_depth_image, const cv::Mat_<float>& depth_image)
-{
-	// use the current estimate of the face location to determine what is foreground and background
-	double tx = this->params_global[4];
-	double ty = this->params_global[5];
-
-	// if we are too close to the edge fail
-	if(tx - 9 <= 0 || ty - 9 <= 0 || tx + 9 >= depth_image.cols || ty + 9 >= depth_image.rows)
-	{
-		cout << "Face estimate is too close to the edge, tracking failed" << endl;
-		return false;
-	}
-
-	cv::Mat_<double> current_shape;
-
-	pdm.CalcShape2D(current_shape, params_local, params_global);
-
-	double min_x, max_x, min_y, max_y;
-
-	int n = this->pdm.NumberOfPoints();
-
-	cv::minMaxLoc(current_shape(cv::Range(0, n), cv::Range(0,1)), &min_x, &max_x);
-	cv::minMaxLoc(current_shape(cv::Range(n, n*2), cv::Range(0,1)), &min_y, &max_y);
-
-	// the area of interest: size of face with some scaling ( these scalings are fairly ad-hoc)
-	double width = 3 * (max_x - min_x); 
-	double height = 2.5 * (max_y - min_y); 
-
-	// getting the region of interest from the depth image,
-	// so we don't get other objects lying at same depth as head in the image but away from it
-	cv::Rect_<int> roi((int)(tx-width/2), (int)(ty - height/2), (int)width, (int)height);
-
-	// clamp it if it does not lie fully in the image
-	if(roi.x < 0) roi.x = 0;
-	if(roi.y < 0) roi.y = 0;
-	if(roi.width + roi.x >= depth_image.cols) roi.x = depth_image.cols - roi.width;
-	if(roi.height + roi.y >= depth_image.rows) roi.y = depth_image.rows - roi.height;
-		
-	if(width > depth_image.cols)
-	{
-		roi.x = 0; roi.width = depth_image.cols;
-	}
-	if(height > depth_image.rows)
-	{
-		roi.y = 0; roi.height = depth_image.rows;
-	}
-
-	if(roi.width == 0) roi.width = depth_image.cols;
-	if(roi.height == 0) roi.height = depth_image.rows;
-
-	if(roi.x >= depth_image.cols) roi.x = 0;
-	if(roi.y >= depth_image.rows) roi.y = 0;
-
-	// Initialise the mask
-	cv::Mat_<uchar> mask(depth_image.rows, depth_image.cols, (uchar)0);
-
-	cv::Mat_<uchar> valid_pixels = depth_image > 0;
-
-	// check if there is any depth near the estimate
-	if(cv::sum(valid_pixels(cv::Rect((int)tx - 8, (int)ty - 8, 16, 16))/255)[0] > 0)
-	{
-		double Z = cv::mean(depth_image(cv::Rect((int)tx - 8, (int)ty - 8, 16, 16)), valid_pixels(cv::Rect((int)tx - 8, (int)ty - 8, 16, 16)))[0]; // Z offset from the surface of the face
-				
-		// Only operate within region of interest of the depth image
-		cv::Mat dRoi = depth_image(roi);
-
-		cv::Mat mRoi = mask(roi);
-
-		// Filter all pixels further than 20cm away from the current pose depth estimate
-		cv::inRange(dRoi, Z - 200, Z + 200, mRoi);
-		
-		// Convert to be either 0 or 1
-		mask = mask / 255;
-		
-		cv::Mat_<float> maskF;
-		mask.convertTo(maskF, CV_32F);
-
-		//Filter the depth image
-		out_depth_image = depth_image.mul(maskF);
-	}
-	else
-	{
-		cout << "No depth signal found in foreground, tracking failed" << endl;
-		return false;
-	}
-	return true;
 }
 
 // Getting a 3D shape model from the current detected landmarks (in camera space)

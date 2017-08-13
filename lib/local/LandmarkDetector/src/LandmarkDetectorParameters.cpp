@@ -1,38 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016, Carnegie Mellon University and University of Cambridge,
+// Copyright (C) 2017, Carnegie Mellon University and University of Cambridge,
 // all rights reserved.
 //
-// THIS SOFTWARE IS PROVIDED “AS IS” FOR ACADEMIC USE ONLY AND ANY EXPRESS
-// OR IMPLIED WARRANTIES WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY.
-// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// ACADEMIC OR NON-PROFIT ORGANIZATION NONCOMMERCIAL RESEARCH USE ONLY
 //
-// Notwithstanding the license granted herein, Licensee acknowledges that certain components
-// of the Software may be covered by so-called “open source” software licenses (“Open Source
-// Components”), which means any software licenses approved as open source licenses by the
-// Open Source Initiative or any substantially similar licenses, including without limitation any
-// license that, as a condition of distribution of the software licensed under such license,
-// requires that the distributor make the software available in source code format. Licensor shall
-// provide a list of Open Source Components for a particular version of the Software upon
-// Licensee’s request. Licensee will comply with the applicable terms of such licenses and to
-// the extent required by the licenses covering Open Source Components, the terms of such
-// licenses will apply in lieu of the terms of this Agreement. To the extent the terms of the
-// licenses applicable to Open Source Components prohibit any of the restrictions in this
-// License Agreement with respect to such Open Source Component, such restrictions will not
-// apply to such Open Source Component. To the extent the terms of the licenses applicable to
-// Open Source Components require Licensor to make an offer to provide source code or
-// related information in connection with the Software, such offer is hereby made. Any request
-// for source code or related information should be directed to cl-face-tracker-distribution@lists.cam.ac.uk
-// Licensee acknowledges receipt of notices for the Open Source Components for the initial
-// delivery of the Software.
-
+// BY USING OR DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO THE TERMS OF THIS LICENSE AGREEMENT.  
+// IF YOU DO NOT AGREE WITH THESE TERMS, YOU MAY NOT USE OR DOWNLOAD THE SOFTWARE.
+//
+// License can be found in OpenFace-license.txt
+//
 //     * Any publications arising from the use of this software, including but
 //       not limited to academic journal and conference publications, technical
 //       reports and manuals, must cite at least one of the following works:
@@ -67,6 +43,11 @@
 // System includes
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
+
+#ifndef CONFIG_DIR
+#define CONFIG_DIR "~"
+#endif
 
 using namespace std;
 
@@ -101,6 +82,15 @@ FaceModelParameters::FaceModelParameters(vector<string> &arguments)
 			valid[i + 1] = false;
 			i++;
 
+		}
+		if (arguments[i].compare("-fdloc") ==0)
+		{
+			string face_detector_loc = arguments[i + 1];
+			face_detector_location = face_detector_loc;
+			curr_face_detector = HAAR_DETECTOR;
+			valid[i] = false;
+			valid[i + 1] = false;
+			i++;
 		}
 		if (arguments[i].compare("-sigma") == 0)
 		{
@@ -191,7 +181,7 @@ FaceModelParameters::FaceModelParameters(vector<string> &arguments)
 		}
 	}
 
-	for (int i = arguments.size() - 1; i >= 0; --i)
+	for (int i = (int)arguments.size() - 1; i >= 0; --i)
 	{
 		if (!valid[i])
 		{
@@ -200,15 +190,25 @@ FaceModelParameters::FaceModelParameters(vector<string> &arguments)
 	}
 
 	// Make sure model_location is valid
-	if (!boost::filesystem::exists(boost::filesystem::path(model_location)))
+	// First check working directory, then the executable's directory, then the config path set by the build process.
+	boost::filesystem::path config_path = boost::filesystem::path(CONFIG_DIR);
+	boost::filesystem::path model_path = boost::filesystem::path(model_location);
+	if (boost::filesystem::exists(model_path))
 	{
-		model_location = (root / model_location).string();
-		if (!boost::filesystem::exists(boost::filesystem::path(model_location)))
-		{
-			std::cout << "Could not find the landmark detection model to load" << std::endl;
-		}
+		model_location = model_path.string();
 	}
-
+	else if (boost::filesystem::exists(root/model_path))
+	{
+		model_location = (root/model_path).string();
+	}
+	else if (boost::filesystem::exists(config_path/model_path))
+	{
+		model_location = (config_path/model_path).string();
+	}
+	else
+	{
+		std::cout << "Could not find the landmark detection model to load" << std::endl;
+	}
 }
 
 void FaceModelParameters::init()
@@ -262,12 +262,7 @@ void FaceModelParameters::init()
 	reinit_video_every = 4;
 
 	// Face detection
-#if OS_UNIX
 	face_detector_location = "classifiers/haarcascade_frontalface_alt.xml";
-#else
-	face_detector_location = "classifiers/haarcascade_frontalface_alt.xml";
-#endif
-
 	quiet_mode = false;
 
 	// By default use HOG SVM
