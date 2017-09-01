@@ -307,7 +307,9 @@ int main (int argc, char **argv)
 	// Bounding boxes for a face in each image (optional)
 	vector<cv::Rect_<double> > bounding_boxes;
 	
-	LandmarkDetector::get_image_input_output_params(files, output_landmark_locations, output_pose_locations, output_images, bounding_boxes, arguments);
+	LandmarkDetector::get_image_input_output_params(files, output_landmark_locations, 
+		output_pose_locations, 
+		output_images, bounding_boxes, arguments);
 	LandmarkDetector::FaceModelParameters det_parameters(arguments);	
 	// No need to validate detections, as we're not doing tracking
 	det_parameters.validate_detections = false;
@@ -427,7 +429,7 @@ int main (int argc, char **argv)
 			// Detect faces in an image
 			vector<cv::Rect_<double> > face_detections;
 
-			if(det_parameters.curr_face_detector == LandmarkDetector::FaceModelParameters::HOG_SVM_DETECTOR)
+			if (det_parameters.curr_face_detector == LandmarkDetector::FaceModelParameters::HOG_SVM_DETECTOR)
 			{
 				vector<double> confidences;
 				LandmarkDetector::DetectFacesHOG(face_detections, grayscale_image, face_detector_hog, confidences);
@@ -607,7 +609,7 @@ int main (int argc, char **argv)
 			if(visualise)
 			{
 				imshow("colour", display_image);
-				cv::waitKey(1);
+				cv::waitKey(0);
 			}
 
 			if(!output_images.empty())
@@ -628,7 +630,8 @@ int main (int argc, char **argv)
 		}				
 
 	}
-	
+
+	cv::waitKey(0);
 	return 0;
 }
 
