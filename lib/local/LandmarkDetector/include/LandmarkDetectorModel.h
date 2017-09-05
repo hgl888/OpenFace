@@ -90,7 +90,7 @@ public:
 	string                  face_detector_location;
 
 	// A HOG SVM-struct based face detector
-	dlib::frontal_face_detector face_detector_HOG;
+	static dlib::frontal_face_detector face_detector_HOG;
 
 
 	// Validate if the detected landmarks are correct using an SVR regressor

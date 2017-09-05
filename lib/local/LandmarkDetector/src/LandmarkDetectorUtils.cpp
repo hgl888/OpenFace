@@ -1374,7 +1374,7 @@ bool DetectFacesHOG(vector<cv::Rect_<double> >& o_regions, const cv::Mat_<uchar>
 		
 	cv::Mat_<uchar> upsampled_intensity;
 
-	double scaling = 1.3;
+	double scaling = 1.0;
 
 	cv::resize(intensity, upsampled_intensity, cv::Size((int)(intensity.cols * scaling), (int)(intensity.rows * scaling)));
 

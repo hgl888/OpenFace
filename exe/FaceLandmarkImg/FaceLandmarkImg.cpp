@@ -337,10 +337,11 @@ int main (int argc, char **argv)
 	cout << "Model loaded" << endl;
 	
 	cv::CascadeClassifier classifier(det_parameters.face_detector_location);
-	dlib::frontal_face_detector face_detector_hog = dlib::get_frontal_face_detector();
+	//dlib::frontal_face_detector face_detector_hog = dlib::get_frontal_face_detector();
 
 	// Loading the AU prediction models
-	string au_loc = "AU_predictors/AU_all_static.txt";
+	//string au_loc = "AU_predictors/AU_all_static.txt";
+	string au_loc = "AU_predictors/AU_all_best.txt";
 
 	boost::filesystem::path au_loc_path = boost::filesystem::path(au_loc);
 	if (boost::filesystem::exists(au_loc_path))
@@ -404,6 +405,10 @@ int main (int argc, char **argv)
 		cv::Mat_<uchar> grayscale_image;
 		convert_to_grayscale(read_image, grayscale_image);
 		
+		//cv::Size dsize = cv::Size(grayscale_image.cols * 0.5, grayscale_image.rows * 0.5);
+		//cv::Mat resize_img = cv::Mat(dsize, CV_8U);
+		//cv::resize(grayscale_image, resize_image);
+		
 
 		// If optical centers are not defined just use center of image
 		if (cx_undefined)
@@ -432,7 +437,7 @@ int main (int argc, char **argv)
 			if (det_parameters.curr_face_detector == LandmarkDetector::FaceModelParameters::HOG_SVM_DETECTOR)
 			{
 				vector<double> confidences;
-				LandmarkDetector::DetectFacesHOG(face_detections, grayscale_image, face_detector_hog, confidences);
+				LandmarkDetector::DetectFacesHOG(face_detections, grayscale_image, LandmarkDetector::CLNF::face_detector_HOG, confidences);
 			}
 			else
 			{
