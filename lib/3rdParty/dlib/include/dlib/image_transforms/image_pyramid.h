@@ -19,17 +19,13 @@ namespace dlib
     public:
 
         template <typename T>
-        vector<double,2> point_down (
-            const vector<T,2>& 
-        ) const
+        vector<double,2> point_down (const vector<T,2>&) const
         {
             return vector<double,2>(0,0);
         }
 
         template <typename T>
-        vector<double,2> point_up (
-            const vector<T,2>& 
-        ) const
+        vector<double,2> point_up (const vector<T,2>&) const
         {
             return vector<double,2>(0,0);
         }

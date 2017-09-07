@@ -23,10 +23,7 @@
 namespace dlib
 {
 
-    template <
-        typename T,
-        long NR = 3
-        >
+    template <typename T, long NR = 3>
     class vector;
 
 // ----------------------------------------------------------------------------------------
@@ -82,20 +79,14 @@ namespace dlib
     struct vector_assign_helper
     {
         template <long NR>
-        static void assign (
-            vector<T,2>& dest,
-            const vector<U,NR>& src
-        )
+        static void assign (vector<T,2>& dest, const vector<U,NR>& src)
         {
             dest.x() = static_cast<T>(src.x());
             dest.y() = static_cast<T>(src.y());
         }
 
         template <long NR>
-        static void assign (
-            vector<T,3>& dest,
-            const vector<U,NR>& src
-        )
+        static void assign (vector<T,3>& dest, const vector<U,NR>& src)
         {
             dest.x() = static_cast<T>(src.x());
             dest.y() = static_cast<T>(src.y());
@@ -103,10 +94,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        static void assign (
-            vector<T,2>& dest,
-            const matrix_exp<EXP>& m
-        )
+        static void assign (vector<T,2>& dest, const matrix_exp<EXP>& m)
         {
             T x = static_cast<T>(m(0));
             T y = static_cast<T>(m(1));
@@ -115,10 +103,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        static void assign (
-            vector<T,3>& dest,
-            const matrix_exp<EXP>& m
-        )
+        static void assign (vector<T,3>& dest, const matrix_exp<EXP>& m)
         {
             T x = static_cast<T>(m(0));
             T y = static_cast<T>(m(1));
@@ -138,20 +123,14 @@ namespace dlib
                                                           std::numeric_limits<U>::is_integer == false>::type>
     {
         template <long NR>
-        static void assign (
-            vector<T,2>& dest,
-            const vector<U,NR>& src
-        )
+        static void assign (vector<T,2>& dest, const vector<U,NR>& src)
         {
             dest.x() = static_cast<T>(std::floor(src.x() + 0.5));
             dest.y() = static_cast<T>(std::floor(src.y() + 0.5));
         }
 
         template <long NR>
-        static void assign (
-            vector<T,3>& dest,
-            const vector<U,NR>& src
-        )
+        static void assign (vector<T,3>& dest, const vector<U,NR>& src)
         {
             dest.x() = static_cast<T>(std::floor(src.x() + 0.5));
             dest.y() = static_cast<T>(std::floor(src.y() + 0.5));
@@ -159,10 +138,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        static void assign (
-            vector<T,3>& dest,
-            const matrix_exp<EXP>& m
-        )
+        static void assign (vector<T,3>& dest, const matrix_exp<EXP>& m)
         {
             dest.x() = static_cast<T>(std::floor(m(0) + 0.5));
             dest.y() = static_cast<T>(std::floor(m(1) + 0.5));
@@ -170,10 +146,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        static void assign (
-            vector<T,2>& dest,
-            const matrix_exp<EXP>& m
-        )
+        static void assign (vector<T,2>& dest, const matrix_exp<EXP>& m)
         {
             dest.x() = static_cast<T>(std::floor(m(0) + 0.5));
             dest.y() = static_cast<T>(std::floor(m(1) + 0.5));
@@ -205,7 +178,8 @@ namespace dlib
         {
             typedef vector<V,N> type;
         };
-            template <typename V, typename U, long N>
+
+        template <typename V, typename U, long N>
         struct vc_rebind_promote
         {
             typedef vector<typename vect_promote<V,U>::type,N> type;
@@ -215,8 +189,7 @@ namespace dlib
 
         typedef T type;
         
-        vector (
-        ) 
+        vector ()
         {
             x() = 0;
             y() = 0;
@@ -225,11 +198,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector (
-            const T _x,
-            const T _y,
-            const T _z
-        ) 
+        vector (const T _x, const T _y, const T _z)
         {
             x() = _x;
             y() = _y;
@@ -238,18 +207,13 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector (
-            const vector& item
-        ) : matrix<T,3,1>(item)
+        vector (const vector& item) : matrix<T,3,1>(item)
         {
         }
 
         // ---------------------------------------
 
-        template <typename U>
-        vector (
-            const vector<U,2>& item
-        )
+        template <typename U> vector (const vector<U,2>& item)
         {
             // Do this so that we get the appropriate rounding depending on the relative
             // type of T and U.
@@ -261,9 +225,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector (
-            const vector<T,2>& item
-        )
+        vector (const vector<T,2>& item)
         {
             x() = item.x();
             y() = item.y();
@@ -273,9 +235,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U>
-        vector (
-            const vector<U,3>& item
-        )
+        vector (const vector<U,3>& item)
         {
             (*this) = item;
         }
@@ -291,9 +251,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename EXP>
-        vector& operator = (
-            const matrix_exp<EXP>& m
-        )
+        vector& operator = (const matrix_exp<EXP>& m)
         {
             // you can only assign vectors with 3 elements to a dlib::vector<T,3> object
             COMPILE_TIME_ASSERT(EXP::NR*EXP::NC == 3 || EXP::NR*EXP::NC == 0);
@@ -315,9 +273,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        vector& operator = (
-            const vector<U,N>& item
-        )
+        vector& operator = (const vector<U,N>& item)
         {
             vector_assign_helper<T,U>::assign(*this, item);
             return *this;
@@ -325,9 +281,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator= (
-            const vector& item
-        )
+        vector& operator= (const vector& item)
         {
             x() = item.x();
             y() = item.y();
@@ -337,16 +291,14 @@ namespace dlib
 
         // ---------------------------------------
 
-        double length(
-        ) const 
+        double length() const
         { 
             return std::sqrt((double)(x()*x() + y()*y() + z()*z())); 
         }
 
         // ---------------------------------------
 
-        typename vc_rebind<double,3>::type normalize (
-        ) const 
+        typename vc_rebind<double,3>::type normalize () const
         {
             const double tmp = std::sqrt((double)(x()*x() + y()*y() + z()*z()));
             return vector<double,3> ( x()/tmp,
@@ -357,57 +309,49 @@ namespace dlib
 
         // ---------------------------------------
 
-        T& x (
-        ) 
+        T& x ()
         { 
             return (*this)(0);
         }
 
         // ---------------------------------------
 
-        T& y (
-        ) 
+        T& y ()
         { 
             return (*this)(1);
         }
 
         // ---------------------------------------
 
-        T& z (
-        ) 
+        T& z ()
         { 
             return (*this)(2);
         }
 
         // ---------------------------------------
 
-        const T& x (
-        ) const
+        const T& x () const
         { 
             return (*this)(0);
         }
 
         // ---------------------------------------
 
-        const T& y (
-        ) const 
+        const T& y () const
         { 
             return (*this)(1);
         }
 
         // ---------------------------------------
 
-        const T& z (
-        ) const
+        const T& z () const
         { 
             return (*this)(2);
         }
 
         // ---------------------------------------
 
-        T dot (
-            const vector& rhs
-        ) const 
+        T dot (const vector& rhs) const
         { 
             return x()*rhs.x() + y()*rhs.y() + z()*rhs.z();
         }
@@ -415,9 +359,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        typename vect_promote<T,U>::type dot (
-            const vector<U,N>& rhs
-        ) const 
+        typename vect_promote<T,U>::type dot (const vector<U,N>& rhs) const
         { 
             return x()*rhs.x() + y()*rhs.y() + z()*rhs.z();
         }
@@ -425,9 +367,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        typename vc_rebind_promote<T,U,3>::type cross (
-            const vector<U,N>& rhs
-        ) const
+        typename vc_rebind_promote<T,U,3>::type cross (const vector<U,N>& rhs) const
         {
             typedef vector<typename vect_promote<T,U>::type,3> ret_type;
 
@@ -440,9 +380,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator += (
-            const vector& rhs
-        )
+        vector& operator += (const vector& rhs)
         {
             x() += rhs.x();
             y() += rhs.y();
@@ -452,9 +390,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator -= (
-            const vector& rhs
-        )
+        vector& operator -= (const vector& rhs)
         {
             x() -= rhs.x();
             y() -= rhs.y();
@@ -464,9 +400,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator /= (
-            const T& rhs
-        )
+        vector& operator /= (const T& rhs)
         {
             x() /= rhs;
             y() /= rhs;
@@ -476,9 +410,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator *= (
-            const T& rhs
-        )
+        vector& operator *= (const T& rhs)
         {
             x() *= rhs;
             y() *= rhs;
@@ -488,8 +420,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector operator - (
-        ) const
+        vector operator - () const
         {
             return vector(-x(), -y(), -z());
         }
@@ -497,9 +428,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U>
-        typename vc_rebind_promote<T,U,3>::type operator / (
-            const U& val
-        ) const
+        typename vc_rebind_promote<T,U,3>::type operator / (const U& val) const
         {
             typedef vector<typename vect_promote<T,U>::type,3> ret_type;
             return ret_type(x()/val, y()/val, z()/val);
@@ -508,9 +437,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long NR2>
-        bool operator== (
-            const vector<U,NR2>& rhs
-        ) const
+        bool operator== (const vector<U,NR2>& rhs) const
         {
             return x()==rhs.x() && y()==rhs.y() && z()==rhs.z();
         }
@@ -518,18 +445,14 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long NR2>
-        bool operator!= (
-            const vector<U,NR2>& rhs
-        ) const
+        bool operator!= (const vector<U,NR2>& rhs) const
         {
             return !(*this == rhs);
         }
 
         // ---------------------------------------
 
-        void swap (
-            vector& item
-        )
+        void swap (vector& item)
         {
             dlib::exchange(x(), item.x());
             dlib::exchange(y(), item.y());
@@ -562,7 +485,8 @@ namespace dlib
         {
             typedef vector<V,N> type;
         };
-            template <typename V, typename U, long N>
+
+        template <typename V, typename U, long N>
         struct vc_rebind_promote
         {
             typedef vector<typename vect_promote<V,U>::type,N> type;
@@ -573,8 +497,7 @@ namespace dlib
 
         typedef T type;
         
-        vector (
-        ) 
+        vector ()
         {
             x() = 0;
             y() = 0;
@@ -582,10 +505,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector (
-            const T _x,
-            const T _y
-        ) 
+        vector (const T _x, const T _y)
         {
             x() = _x;
             y() = _y;
@@ -594,9 +514,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U>
-        vector (
-            const vector<U,3>& item
-        )
+        vector (const vector<U,3>& item)
         {
             // Do this so that we get the appropriate rounding depending on the relative
             // type of T and U.
@@ -607,17 +525,13 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector (
-            const vector& item
-        ) : matrix<T,2,1>(item)
+        vector (const vector& item) : matrix<T,2,1>(item)
         {
         }
 
         // ---------------------------------------
 
-        vector (
-            const vector<T,3>& item
-        )
+        vector (const vector<T,3>& item)
         {
             x() = item.x();
             y() = item.y();
@@ -626,9 +540,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U>
-        vector (
-            const vector<U,2>& item
-        )
+        vector (const vector<U,2>& item)
         {
             (*this) = item;
         }
@@ -644,9 +556,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename EXP>
-        vector& operator = (
-            const matrix_exp<EXP>& m
-        )
+        vector& operator = (const matrix_exp<EXP>& m)
         {
             // you can only assign vectors with 2 elements to a dlib::vector<T,2> object
             COMPILE_TIME_ASSERT(EXP::NR*EXP::NC == 2 || EXP::NR*EXP::NC == 0);
@@ -668,9 +578,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        vector& operator = (
-            const vector<U,N>& item
-        )
+        vector& operator = (const vector<U,N>& item)
         {
             vector_assign_helper<T,U>::assign(*this, item);
             return *this;
@@ -678,9 +586,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator= (
-            const vector& item
-        )
+        vector& operator= (const vector& item)
         {
             x() = item.x();
             y() = item.y();
@@ -689,8 +595,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        double length(
-        ) const 
+        double length() const
         { 
             return std::sqrt((double)(x()*x() + y()*y())); 
         }
@@ -698,8 +603,7 @@ namespace dlib
         // ---------------------------------------
 
 
-        typename vc_rebind<double,2>::type normalize (
-        ) const 
+        typename vc_rebind<double,2>::type normalize () const
         {
             const double tmp = std::sqrt((double)(x()*x() + y()*y()));
             return vector<double,2> ( x()/tmp,
@@ -709,49 +613,42 @@ namespace dlib
 
         // ---------------------------------------
 
-        T& x (
-        ) 
+        T& x ()
         { 
             return (*this)(0);
         }
 
         // ---------------------------------------
 
-        T& y (
-        ) 
+        T& y ()
         { 
             return (*this)(1);
         }
 
         // ---------------------------------------
 
-        const T& x (
-        ) const
+        const T& x () const
         { 
             return (*this)(0);
         }
 
         // ---------------------------------------
 
-        const T& y (
-        ) const 
+        const T& y () const
         { 
             return (*this)(1);
         }
 
         // ---------------------------------------
 
-        const T z (
-        ) const
+        const T z () const
         {
             return 0;
         }
 
         // ---------------------------------------
 
-        T dot (
-            const vector& rhs
-        ) const 
+        T dot (const vector& rhs) const
         { 
             return x()*rhs.x() + y()*rhs.y();
         }
@@ -759,18 +656,14 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        typename vect_promote<T,U>::type dot (
-            const vector<U,N>& rhs
-        ) const 
+        typename vect_promote<T,U>::type dot (const vector<U,N>& rhs) const
         { 
             return x()*rhs.x() + y()*rhs.y() + z()*rhs.z();
         }
 
         // ---------------------------------------
 
-        vector& operator += (
-            const vector& rhs
-        )
+        vector& operator += (const vector& rhs)
         {
             x() += rhs.x();
             y() += rhs.y();
@@ -779,9 +672,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator -= (
-            const vector& rhs
-        )
+        vector& operator -= (const vector& rhs)
         {
             x() -= rhs.x();
             y() -= rhs.y();
@@ -790,9 +681,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator /= (
-            const T& rhs
-        )
+        vector& operator /= (const T& rhs)
         {
             x() /= rhs;
             y() /= rhs;
@@ -801,9 +690,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector& operator *= (
-            const T& rhs
-        )
+        vector& operator *= (const T& rhs)
         {
             x() *= rhs;
             y() *= rhs;
@@ -812,8 +699,7 @@ namespace dlib
 
         // ---------------------------------------
 
-        vector operator - (
-        ) const
+        vector operator - () const
         {
             return vector(-x(), -y());
         }
@@ -821,9 +707,7 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U>
-        typename vc_rebind_promote<T,U,2>::type operator / (
-            const U& val
-        ) const
+        typename vc_rebind_promote<T,U,2>::type operator / (const U& val) const
         {
             typedef vector<typename vect_promote<T,U>::type,2> ret_type;
             return ret_type(x()/val, y()/val);
@@ -832,18 +716,14 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long NR2>
-        bool operator== (
-            const vector<U,NR2>& rhs
-        ) const
+        bool operator== (const vector<U,NR2>& rhs) const
         {
             return x()==rhs.x() && y()==rhs.y() && z()==rhs.z();
         }
 
         // ---------------------------------------
 
-        bool operator== (
-            const vector& rhs
-        ) const
+        bool operator== (const vector& rhs) const
         {
             return x()==rhs.x() && y()==rhs.y();
         }
@@ -851,27 +731,21 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long NR2>
-        bool operator!= (
-            const vector<U,NR2>& rhs
-        ) const
+        bool operator!= (const vector<U,NR2>& rhs) const
         {
             return !(*this == rhs);
         }
 
         // ---------------------------------------
 
-        bool operator!= (
-            const vector& rhs
-        ) const
+        bool operator!= (const vector& rhs) const
         {
             return !(*this == rhs);
         }
 
         // ---------------------------------------
 
-        void swap (
-            vector& item
-        )
+        void swap (vector& item)
         {
             dlib::exchange(x(), item.x());
             dlib::exchange(y(), item.y());
@@ -880,16 +754,10 @@ namespace dlib
         // ---------------------------------------
 
         template <typename U, long N>
-        typename vc_rebind_promote<T,U,3>::type cross (
-            const vector<U,N>& rhs
-        ) const
+        typename vc_rebind_promote<T,U,3>::type cross (const vector<U,N>& rhs) const
         {
             typedef vector<typename vect_promote<T,U>::type,3> ret_type;
-            return ret_type (
-                y()*rhs.z(),
-                - x()*rhs.z(),
-                x()*rhs.y() - y()*rhs.x()
-                );
+            return ret_type (y()*rhs.z(), - x()*rhs.z(), x()*rhs.y() - y()*rhs.x());
         }
 
         // ---------------------------------------
@@ -901,10 +769,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,2>::type operator+ (
-        const vector<T,2>& lhs,
-        const vector<U,2>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,2>::type operator+ (const vector<T,2>& lhs, const vector<U,2>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,2>::type ret_type;
         return ret_type(lhs.x()+rhs.x(), lhs.y()+rhs.y());
@@ -913,10 +778,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator+ (
-        const vector<T,3>& lhs,
-        const vector<U,3>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator+ (const vector<T,3>& lhs, const vector<U,3>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()+rhs.x(), lhs.y()+rhs.y(), lhs.z()+rhs.z());
@@ -925,10 +787,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator+ (
-        const vector<T,2>& lhs,
-        const vector<U,3>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator+ (const vector<T,2>& lhs, const vector<U,3>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()+rhs.x(), lhs.y()+rhs.y(), rhs.z());
@@ -937,10 +796,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator+ (
-        const vector<T,3>& lhs,
-        const vector<U,2>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator+ (const vector<T,3>& lhs, const vector<U,2>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()+rhs.x(), lhs.y()+rhs.y(), lhs.z());
@@ -951,10 +807,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,2>::type operator- (
-        const vector<T,2>& lhs,
-        const vector<U,2>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,2>::type operator- (const vector<T,2>& lhs, const vector<U,2>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,2>::type ret_type;
         return ret_type(lhs.x()-rhs.x(), lhs.y()-rhs.y());
@@ -963,10 +816,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator- (
-        const vector<T,3>& lhs,
-        const vector<U,3>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator- (const vector<T,3>& lhs, const vector<U,3>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()-rhs.x(), lhs.y()-rhs.y(), lhs.z()-rhs.z());
@@ -975,10 +825,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator- (
-        const vector<T,2>& lhs,
-        const vector<U,3>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator- (const vector<T,2>& lhs, const vector<U,3>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()-rhs.x(), lhs.y()-rhs.y(), -rhs.z());
@@ -987,10 +834,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline const typename vc_rebind_promote<T,U,3>::type operator- (
-        const vector<T,3>& lhs,
-        const vector<U,2>& rhs 
-    )
+    inline const typename vc_rebind_promote<T,U,3>::type operator- (const vector<T,3>& lhs, const vector<U,2>& rhs)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(lhs.x()-rhs.x(), lhs.y()-rhs.y(), lhs.z());
@@ -1001,9 +845,16 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,2>::type >::type operator* (
-        const vector<T,2>& v,
-        const U& s
+    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,2>::type >::type operator* (const vector<T,2>& v, const U& s)
+    {
+        typedef typename vc_rebind_promote<T,U,2>::type ret_type;
+        return ret_type(v.x()*s, v.y()*s);
+    }
+
+// ----------------------------------------------------------------------------------------
+
+    template <typename T, typename U>
+    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,2>::type >::type operator* (const U& s, const vector<T,2>& v
     )
     {
         typedef typename vc_rebind_promote<T,U,2>::type ret_type;
@@ -1013,22 +864,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,2>::type >::type operator* (
-        const U& s,
-        const vector<T,2>& v
-    )
-    {
-        typedef typename vc_rebind_promote<T,U,2>::type ret_type;
-        return ret_type(v.x()*s, v.y()*s);
-    }
-
-// ----------------------------------------------------------------------------------------
-
-    template <typename T, typename U>
-    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,3>::type >::type operator* (
-        const vector<T,3>& v,
-        const U& s
-    )
+    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,3>::type >::type operator* (const vector<T,3>& v, const U& s)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(v.x()*s, v.y()*s, v.z()*s);
@@ -1037,10 +873,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T, typename U>
-    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,3>::type >::type operator* (
-        const U& s,
-        const vector<T,3>& v
-    )
+    inline typename disable_if<is_matrix<U>, const typename vc_rebind_promote<T,U,3>::type >::type operator* (const U& s, const vector<T,3>& v)
     {
         typedef typename vc_rebind_promote<T,U,3>::type ret_type;
         return ret_type(v.x()*s, v.y()*s, v.z()*s);
@@ -1049,18 +882,12 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template<typename T, long NR>
-    inline void swap (
-        vector<T,NR> & a, 
-        vector<T,NR> & b 
-    ) { a.swap(b); }   
+    inline void swap (vector<T,NR> & a, vector<T,NR> & b) { a.swap(b); }
 
 // ----------------------------------------------------------------------------------------
 
     template<typename T>
-    inline void serialize (
-        const vector<T,3>& item,  
-        std::ostream& out
-    )
+    inline void serialize (const vector<T,3>& item, std::ostream& out)
     {
         try
         {
@@ -1075,10 +902,7 @@ namespace dlib
     }
 
     template<typename T>
-    inline void deserialize (
-        vector<T,3>& item,  
-        std::istream& in
-    )
+    inline void deserialize (vector<T,3>& item, std::istream& in)
     {
         try
         {
@@ -1098,10 +922,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template<typename T>
-    inline void serialize (
-        const vector<T,2>& item,  
-        std::ostream& out
-    )
+    inline void serialize (const vector<T,2>& item, std::ostream& out)
     {
         try
         {
@@ -1115,10 +936,7 @@ namespace dlib
     }
 
     template<typename T>
-    inline void deserialize (
-        vector<T,2>& item,  
-        std::istream& in
-    )
+    inline void deserialize (vector<T,2>& item, std::istream& in)
     {
         try
         {
@@ -1136,20 +954,14 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template<typename T>
-    std::ostream& operator<< (
-        std::ostream& out, 
-        const vector<T,3>& item 
-    )
+    std::ostream& operator<< (std::ostream& out, const vector<T,3>& item)
     {
         out << "(" << item.x() << ", " << item.y() << ", " << item.z() << ")";
         return out;
     }
 
     template<typename T>
-    std::istream& operator>>(
-        std::istream& in, 
-        vector<T,3>& item 
-    )   
+    std::istream& operator>>(std::istream& in, vector<T,3>& item)
     {
 
         // eat all the crap up to the '(' 
@@ -1201,20 +1013,14 @@ namespace dlib
 
 
     template<typename T>
-    std::ostream& operator<< (
-        std::ostream& out, 
-        const vector<T,2>& item 
-    )
+    std::ostream& operator<< (std::ostream& out, const vector<T,2>& item)
     {
         out << "(" << item.x() << ", " << item.y() << ")";
         return out;
     }
 
     template<typename T>
-    std::istream& operator>>(
-        std::istream& in, 
-        vector<T,2>& item 
-    )   
+    std::istream& operator>>(std::istream& in, vector<T,2>& item)
     {
 
         // eat all the crap up to the '(' 

@@ -23,12 +23,7 @@ namespace dlib
     {
         template <typename image_type>
         inline typename dlib::enable_if_c<pixel_traits<typename image_type::pixel_type>::rgb>::type get_gradient (
-            const int r,
-            const int c,
-            const image_type& img,
-            matrix<double,2,1>& grad,
-            double& len
-        )
+            const int r, const int c, const image_type& img, matrix<double,2,1>& grad, double& len)
         {
             matrix<double,2,1> grad2, grad3;
             // get the red gradient
@@ -61,13 +56,7 @@ namespace dlib
 
         template <typename image_type>
         inline typename dlib::enable_if_c<pixel_traits<typename image_type::pixel_type>::rgb>::type get_gradient (
-            const int r,
-            const int c,
-            const image_type& img,
-            simd4f& grad_x,
-            simd4f& grad_y,
-            simd4f& len
-        )
+            const int r, const int c, const image_type& img, simd4f& grad_x, simd4f& grad_y, simd4f& len)
         {
             simd4i rleft((int)img[r][c-1].red, 
                         (int)img[r][c].red,
@@ -146,12 +135,7 @@ namespace dlib
 
         template <typename image_type>
         inline typename dlib::disable_if_c<pixel_traits<typename image_type::pixel_type>::rgb>::type get_gradient (
-            const int r,
-            const int c,
-            const image_type& img,
-            matrix<double,2,1>& grad,
-            double& len
-        )
+            const int r, const int c, const image_type& img, matrix<double,2,1>& grad, double& len)
         {
             grad(0) = (int)get_pixel_intensity(img[r][c+1])-(int)get_pixel_intensity(img[r][c-1]); 
             grad(1) = (int)get_pixel_intensity(img[r+1][c])-(int)get_pixel_intensity(img[r-1][c]);
@@ -160,13 +144,7 @@ namespace dlib
 
         template <typename image_type>
         inline typename dlib::disable_if_c<pixel_traits<typename image_type::pixel_type>::rgb>::type get_gradient (
-            int r,
-            int c,
-            const image_type& img,
-            simd4f& grad_x,
-            simd4f& grad_y,
-            simd4f& len
-        )
+            int r, int c, const image_type& img, simd4f& grad_x, simd4f& grad_y, simd4f& len)
         {
             simd4i left((int)get_pixel_intensity(img[r][c-1]), 
                         (int)get_pixel_intensity(img[r][c]),
@@ -195,25 +173,13 @@ namespace dlib
     // ------------------------------------------------------------------------------------
 
         template <typename T, typename mm1, typename mm2>
-        inline void set_hog (
-            dlib::array<array2d<T,mm1>,mm2>& hog,
-            int o,
-            int x, 
-            int y,
-            const double& value
-        )
+        inline void set_hog (dlib::array<array2d<T,mm1>,mm2>& hog, int o, int x, int y, const double& value)
         {
             hog[o][y][x] = value;
         }
 
         template <typename T, typename mm1, typename mm2>
-        void init_hog (
-            dlib::array<array2d<T,mm1>,mm2>& hog,
-            int hog_nr,
-            int hog_nc,
-            int filter_rows_padding,
-            int filter_cols_padding
-        )
+        void init_hog(dlib::array<array2d<T,mm1>,mm2>& hog, int hog_nr, int hog_nc, int filter_rows_padding, int filter_cols_padding)
         {
             const int num_hog_bands = 27+4;
             hog.resize(num_hog_bands);
@@ -232,25 +198,13 @@ namespace dlib
     // ------------------------------------------------------------------------------------
 
         template <typename T, typename mm>
-        inline void set_hog (
-            array2d<matrix<T,31,1>,mm>& hog,
-            int o,
-            int x, 
-            int y,
-            const double& value
-        )
+        inline void set_hog (array2d<matrix<T,31,1>,mm>& hog, int o, int x, int y, const double& value)
         {
             hog[y][x](o) = value;
         }
 
         template <typename T, typename mm>
-        void init_hog (
-            array2d<matrix<T,31,1>,mm>& hog,
-            int hog_nr,
-            int hog_nc,
-            int filter_rows_padding,
-            int filter_cols_padding
-        )
+        void init_hog (array2d<matrix<T,31,1>,mm>& hog, int hog_nr, int hog_nc, int filter_rows_padding, int filter_cols_padding)
         {
             hog.set_size(hog_nr+filter_rows_padding-1, hog_nc+filter_cols_padding-1);
 
@@ -270,17 +224,8 @@ namespace dlib
 
     // ------------------------------------------------------------------------------------
 
-        template <
-            typename image_type, 
-            typename out_type
-            >
-        void impl_extract_fhog_features(
-            const image_type& img_, 
-            out_type& hog, 
-            int cell_size,
-            int filter_rows_padding,
-            int filter_cols_padding
-        ) 
+        template <typename image_type, typename out_type>
+        void impl_extract_fhog_features(const image_type& img_, out_type& hog, int cell_size, int filter_rows_padding, int filter_cols_padding)
         {
             const_image_view<image_type> img(img_);
             // make sure requires clause is not broken
@@ -600,17 +545,15 @@ namespace dlib
 
     // ------------------------------------------------------------------------------------
 
-        inline void create_fhog_bar_images (
-            dlib::array<matrix<float> >& mbars,
-            const long w
-        )
+        inline void create_fhog_bar_images (dlib::array<matrix<float> >& mbars, const long w)
         {
             const long bdims = 9;
             // Make the oriented lines we use to draw on each HOG cell.
             mbars.resize(bdims);
             dlib::array<array2d<unsigned char> > bars(bdims);
             array2d<unsigned char> temp(w,w);
-            for (unsigned long i = 0; i < bars.size(); ++i)
+            unsigned long isize = bars.size();
+            for (unsigned long i = 0; i < isize; ++i)
             {
                 assign_all_pixels(temp, 0);
                 draw_line(temp, point(w/2,0), point(w/2,w-1), 255);
@@ -627,19 +570,9 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_type, 
-        typename T, 
-        typename mm1, 
-        typename mm2
-        >
-    void extract_fhog_features(
-        const image_type& img, 
-        dlib::array<array2d<T,mm1>,mm2>& hog, 
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    ) 
+    template <typename image_type, typename T, typename mm1, typename mm2>
+    void extract_fhog_features(const image_type& img, dlib::array<array2d<T,mm1>,mm2>& hog, int cell_size = 8,
+                               int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         impl_fhog::impl_extract_fhog_features(img, hog, cell_size, filter_rows_padding, filter_cols_padding);
         // If the image is too small then the above function outputs an empty feature map.
@@ -649,35 +582,18 @@ namespace dlib
             hog.resize(31);
     }
 
-    template <
-        typename image_type, 
-        typename T, 
-        typename mm
-        >
-    void extract_fhog_features(
-        const image_type& img, 
-        array2d<matrix<T,31,1>,mm>& hog, 
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    ) 
+    template <typename image_type, typename T, typename mm>
+    void extract_fhog_features(const image_type& img, array2d<matrix<T,31,1>,mm>& hog, int cell_size = 8,
+                               int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         impl_fhog::impl_extract_fhog_features(img, hog, cell_size, filter_rows_padding, filter_cols_padding);
     }
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_type,
-        typename T
-        >
-    void extract_fhog_features(
-        const image_type& img, 
-        matrix<T,0,1>& feats,
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    )
+    template <typename image_type, typename T>
+    void extract_fhog_features(const image_type& img, matrix<T,0,1>& feats, int cell_size = 8,
+                               int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         dlib::array<array2d<T> > hog;
         extract_fhog_features(img, hog, cell_size, filter_rows_padding, filter_cols_padding);
@@ -691,15 +607,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_type
-        >
-    matrix<double,0,1> extract_fhog_features(
-        const image_type& img, 
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    )
+    template <typename image_type>
+    matrix<double,0,1> extract_fhog_features(const image_type& img, int cell_size = 8, int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         matrix<double,0,1> feats;
         extract_fhog_features(img, feats, cell_size, filter_rows_padding, filter_cols_padding);
@@ -709,12 +618,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
-    inline point image_to_fhog (
-        point p,
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    )
+    inline point image_to_fhog (point p, int cell_size = 8, int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_size > 0 &&
@@ -735,12 +639,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    inline rectangle image_to_fhog (
-        const rectangle& rect,
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    ) 
+    inline rectangle image_to_fhog (const rectangle& rect, int cell_size = 8, int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_size > 0 &&
@@ -759,12 +658,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    inline point fhog_to_image (
-        point p,
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    )
+    inline point fhog_to_image (point p, int cell_size = 8, int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_size > 0 &&
@@ -790,12 +684,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    inline rectangle fhog_to_image (
-        const rectangle& rect,
-        int cell_size = 8,
-        int filter_rows_padding = 1,
-        int filter_cols_padding = 1
-    ) 
+    inline rectangle fhog_to_image (const rectangle& rect, int cell_size = 8, int filter_rows_padding = 1, int filter_cols_padding = 1)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_size > 0 &&
@@ -815,15 +704,8 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename T, 
-        typename mm1, 
-        typename mm2
-        >
-    matrix<unsigned char> draw_fhog(
-        const dlib::array<array2d<T,mm1>,mm2>& hog,
-        const long cell_draw_size = 15
-    )
+    template <typename T, typename mm1, typename mm2>
+    matrix<unsigned char> draw_fhog(const dlib::array<array2d<T,mm1>,mm2>& hog, const long cell_draw_size = 15)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_draw_size > 0 && hog.size()==31,
@@ -865,13 +747,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename T
-        >
-    matrix<unsigned char> draw_fhog (
-        const std::vector<matrix<T> >& hog,
-        const long cell_draw_size = 15
-    )
+    template <typename T>
+    matrix<unsigned char> draw_fhog (const std::vector<matrix<T> >& hog, const long cell_draw_size = 15)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_draw_size > 0 && hog.size()==31,
@@ -900,14 +777,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename T, 
-        typename mm
-        >
-    matrix<unsigned char> draw_fhog(
-        const array2d<matrix<T,31,1>,mm>& hog,
-        const long cell_draw_size = 15
-    )
+    template <typename T, typename mm>
+    matrix<unsigned char> draw_fhog(const array2d<matrix<T,31,1>,mm>& hog, const long cell_draw_size = 15)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT( cell_draw_size > 0,

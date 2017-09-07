@@ -977,7 +977,7 @@ namespace dlib
     };
 
     template <
-        typename T,
+     typename T,
         long num_rows,
         long num_cols,
         typename mem_manager,
@@ -999,13 +999,9 @@ namespace dlib
         typedef T*          iterator;       
         typedef const T*    const_iterator; 
 
-        matrix () 
-        {
-        }
+        matrix () {}
 
-        explicit matrix (
-            long length 
-        ) 
+        explicit matrix (long length)
         {
             // This object you are trying to call matrix(length) on is not a column or 
             // row vector.
@@ -1047,10 +1043,7 @@ namespace dlib
             }
         }
 
-        matrix (
-            long rows,
-            long cols 
-        )  
+        matrix (long rows, long cols)
         {
             DLIB_ASSERT( (NR == 0 || NR == rows) && ( NC == 0 || NC == cols) && 
                     rows >= 0 && cols >= 0, 
@@ -1065,9 +1058,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        matrix (
-            const matrix_exp<EXP>& m
-        )
+        matrix (const matrix_exp<EXP>& m)
         {
             // You get an error on this line if the matrix m contains a type that isn't
             // the same as the type contained in the target matrix.
@@ -1093,18 +1084,14 @@ namespace dlib
             matrix_assign(*this, m);
         }
 
-        matrix (
-            const matrix& m
-        ) : matrix_exp<matrix>(*this) 
+        matrix (const matrix& m) : matrix_exp<matrix>(*this)
         {
             data.set_size(m.nr(),m.nc());
             matrix_assign(*this, m);
         }
 
         template <typename U, size_t len>
-        explicit matrix (
-            U (&array)[len]
-        ) 
+        explicit matrix (U (&array)[len])
         {
             COMPILE_TIME_ASSERT(NR*NC == len && len > 0);
             size_t idx = 0;
@@ -1118,10 +1105,7 @@ namespace dlib
             }
         }
 
-        T& operator() (
-            long r, 
-            long c
-        ) 
+        T& operator() (long r, long c)
         { 
             DLIB_ASSERT(r < nr() && c < nc() &&
                    r >= 0 && c >= 0, 
@@ -1136,10 +1120,7 @@ namespace dlib
             return data(r,c); 
         }
 
-        const T& operator() (
-            long r, 
-            long c
-        ) const 
+        const T& operator() (long r, long c) const
         { 
             DLIB_ASSERT(r < nr() && c < nc() &&
                    r >= 0 && c >= 0, 
@@ -1154,9 +1135,7 @@ namespace dlib
             return data(r,c);
         }
 
-        T& operator() (
-            long i
-        ) 
+        T& operator() (long i)
         {
             // You can only use this operator on column vectors.
             COMPILE_TIME_ASSERT(NC == 1 || NC == 0 || NR == 1 || NR == 0);
@@ -1178,9 +1157,7 @@ namespace dlib
             return data(i);
         }
 
-        const T& operator() (
-            long i
-        ) const
+        const T& operator() (long i) const
         {
             // You can only use this operator on column vectors.
             COMPILE_TIME_ASSERT(NC == 1 || NC == 0 || NR == 1 || NR == 0);
@@ -1202,8 +1179,7 @@ namespace dlib
             return data(i);
         }
 
-        inline operator const type (
-        ) const 
+        inline operator const type () const
         {
             COMPILE_TIME_ASSERT(NC == 1 || NC == 0);
             COMPILE_TIME_ASSERT(NR == 1 || NR == 0);
@@ -1218,10 +1194,7 @@ namespace dlib
             return data(0);
         }
 
-        void set_size (
-            long rows,
-            long cols
-        )
+        void set_size (long rows, long cols)
         {
             DLIB_ASSERT( (NR == 0 || NR == rows) && ( NC == 0 || NC == cols) &&
                     rows >= 0 && cols >= 0, 
@@ -1237,9 +1210,7 @@ namespace dlib
                 data.set_size(rows,cols);
         }
 
-        void set_size (
-            long length
-        )
+        void set_size (long length)
         {
             // This object you are trying to call set_size(length) on is not a column or 
             // row vector.
@@ -1283,19 +1254,14 @@ namespace dlib
             }
         }
 
-        long nr (
-        ) const { return data.nr(); }
+        long nr () const { return data.nr(); }
 
-        long nc (
-        ) const { return data.nc(); }
+        long nc () const { return data.nc(); }
 
-        long size (
-        ) const { return data.nr()*data.nc(); }
+        long size () const { return data.nr()*data.nc(); }
 
         template <typename U, size_t len>
-        matrix& operator= (
-            U (&array)[len]
-        )
+        matrix& operator= (U (&array)[len])
         {
             COMPILE_TIME_ASSERT(NR*NC == len && len > 0);
             size_t idx = 0;
@@ -1311,9 +1277,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        matrix& operator= (
-            const matrix_exp<EXP>& m
-        )
+        matrix& operator= (const matrix_exp<EXP>& m)
         {
             // You get an error on this line if the matrix you are trying to 
             // assign m to is a statically sized matrix and  m's dimensions don't 
@@ -1363,9 +1327,7 @@ namespace dlib
         }
 
         template <typename EXP>
-        matrix& operator += (
-            const matrix_exp<EXP>& m
-        )
+        matrix& operator += (const matrix_exp<EXP>& m)
         {
             // The matrix you are trying to assign m to is a statically sized matrix and 
             // m's dimensions don't match that of *this. 
@@ -1397,9 +1359,7 @@ namespace dlib
 
 
         template <typename EXP>
-        matrix& operator -= (
-            const matrix_exp<EXP>& m
-        )
+        matrix& operator -= (const matrix_exp<EXP>& m)
         {
             // The matrix you are trying to assign m to is a statically sized matrix and 
             // m's dimensions don't match that of *this. 
@@ -1430,17 +1390,13 @@ namespace dlib
         }
 
         template <typename EXP>
-        matrix& operator *= (
-            const matrix_exp<EXP>& m
-        )
+        matrix& operator *= (const matrix_exp<EXP>& m)
         {
             *this = *this * m;
             return *this;
         }
 
-        matrix& operator += (
-            const matrix& m
-        )
+        matrix& operator += (const matrix& m)
         {
             const long size = m.nr()*m.nc();
             if (nr() == m.nr() && nc() == m.nc())
@@ -1457,9 +1413,7 @@ namespace dlib
             return *this;
         }
 
-        matrix& operator -= (
-            const matrix& m
-        )
+        matrix& operator -= (const matrix& m)
         {
             const long size = m.nr()*m.nc();
             if (nr() == m.nr() && nc() == m.nc())
@@ -1476,9 +1430,7 @@ namespace dlib
             return *this;
         }
 
-        matrix& operator += (
-            const T val
-        )
+        matrix& operator += (const T val)
         {
             const long size = nr()*nc();
             for (long i = 0; i < size; ++i)
@@ -1487,36 +1439,27 @@ namespace dlib
             return *this;
         }
 
-        matrix& operator -= (
-            const T val
-        )
+        matrix& operator -= (const T val)
         {
             const long size = nr()*nc();
             for (long i = 0; i < size; ++i)
                 data(i) -= val;
-
             return *this;
         }
 
-        matrix& operator *= (
-            const T a
-        )
+        matrix& operator *= (const T a)
         {
             *this = *this * a;
             return *this;
         }
 
-        matrix& operator /= (
-            const T a
-        )
+        matrix& operator /= (const T a)
         {
             *this = *this / a;
             return *this;
         }
 
-        matrix& operator= (
-            const matrix& m
-        )
+        matrix& operator= (const matrix& m)
         {
             if (this != &m)
             {
@@ -1528,26 +1471,19 @@ namespace dlib
             return *this;
         }
 
-        void swap (
-            matrix& item
-        )
+        void swap (matrix& item)
         {
             data.swap(item.data);
         }
 
         template <typename U>
-        bool aliases (
-            const matrix_exp<U>& 
-        ) const { return false; }
+        bool aliases (const matrix_exp<U>&) const { return false; }
 
-        bool aliases (
-            const matrix_exp<matrix<T,num_rows,num_cols, mem_manager,layout> >& item
-        ) const { return (this == &item); }
+        bool aliases (const matrix_exp<matrix<T,num_rows,num_cols, mem_manager,layout> >& item) const
+        { return (this == &item); }
 
         template <typename U>
-        bool destructively_aliases (
-            const matrix_exp<U>& 
-        ) const { return false; }
+        bool destructively_aliases (const matrix_exp<U>&) const { return false; }
 
 
         iterator begin() 
@@ -1623,8 +1559,7 @@ namespace dlib
 
             friend class matrix;
 
-            void next (
-            ) const
+            void next () const
             {
                 ++c;
                 if (c == m->nc())
@@ -1642,17 +1577,13 @@ namespace dlib
 
     public:
 
-        matrix& operator = (
-            const literal_assign_helper& val
-        ) 
+        matrix& operator = (const literal_assign_helper& val)
         {  
             *this = *val.m;
             return *this;
         }
 
-        const literal_assign_helper operator = (
-            const T& val
-        ) 
+        const literal_assign_helper operator = (const T& val)
         {  
             // assign the given value to every spot in this matrix
             for (long r = 0; r < nr(); ++r)
@@ -1670,8 +1601,6 @@ namespace dlib
         }
 
     private:
-
-
         typename layout::template layout<T,NR,NC,mem_manager> data;
     };
 
@@ -1686,10 +1615,7 @@ namespace dlib
         typename mm,
         typename l
         >
-    void swap(
-        matrix<T,NR,NC,mm,l>& a,
-        matrix<T,NR,NC,mm,l>& b
-    ) { a.swap(b); }
+    void swap(matrix<T,NR,NC,mm,l>& a, matrix<T,NR,NC,mm,l>& b) { a.swap(b); }
 
     template <
         typename T,
@@ -1698,10 +1624,7 @@ namespace dlib
         typename mm,
         typename l
         >
-    void serialize (
-        const matrix<T,NR,NC,mm,l>& item, 
-        std::ostream& out
-    )
+    void serialize (const matrix<T,NR,NC,mm,l>& item, std::ostream& out)
     {
         try
         {
@@ -1711,9 +1634,11 @@ namespace dlib
             // objects have compatible serialization formats.
             serialize(-item.nr(),out);
             serialize(-item.nc(),out);
-            for (long r = 0; r < item.nr(); ++r)
+            long lr = item.nr();
+            long lc = item.nc();
+            for (long r = 0; r < lr; ++r)
             {
-                for (long c = 0; c < item.nc(); ++c)
+                for (long c = 0; c < lc; ++c)
                 {
                     serialize(item(r,c),out);
                 }
@@ -1732,10 +1657,7 @@ namespace dlib
         typename mm,
         typename l
         >
-    void deserialize (
-        matrix<T,NR,NC,mm,l>& item, 
-        std::istream& in
-    )
+    void deserialize (matrix<T,NR,NC,mm,l>& item, std::istream& in)
     {
         try
         {
@@ -1770,13 +1692,8 @@ namespace dlib
         }
     }
 
-    template <
-        typename EXP
-        >
-    std::ostream& operator<< (
-        std::ostream& out,
-        const matrix_exp<EXP>& m
-    )
+    template <typename EXP>
+    std::ostream& operator<< (std::ostream& out, const matrix_exp<EXP>& m)
     {
         using namespace std;
         const streamsize old = out.width();
@@ -1784,9 +1701,11 @@ namespace dlib
         // first figure out how wide we should make each field
         string::size_type w = 0;
         ostringstream sout;
-        for (long r = 0; r < m.nr(); ++r)
+        long lr = m.nr();
+        long lc = m.nc();
+        for (long r = 0; r < lr; ++r)
         {
-            for (long c = 0; c < m.nc(); ++c)
+            for (long c = 0; c < lc; ++c)
             {
                 sout << m(r,c); 
                 w = std::max(sout.str().size(),w);
@@ -1795,9 +1714,9 @@ namespace dlib
         }
 
         // now actually print it
-        for (long r = 0; r < m.nr(); ++r)
+        for (long r = 0; r < lr; ++r)
         {
-            for (long c = 0; c < m.nc(); ++c)
+            for (long c = 0; c < lc; ++c)
             {
                 out.width(static_cast<streamsize>(w));
                 out << m(r,c) << " ";
@@ -1838,15 +1757,15 @@ namespace dlib
         print_matrix_as_csv_helper (std::ostream& out_) : out(out_) {}
 
         template <typename EXP>
-        std::ostream& operator<< (
-            const matrix_exp<EXP>& m
-        ) 
+        std::ostream& operator<< (const matrix_exp<EXP>& m)
         {
-            for (long r = 0; r < m.nr(); ++r)
+            long lr = m.nr();
+            long lc = m.nc();
+            for (long r = 0; r < lr; ++r)
             {
-                for (long c = 0; c < m.nc(); ++c)
+                for (long c = 0; c < lc; ++c)
                 {
-                    if (c+1 == m.nc())
+                    if (c+1 == lc )
                         out << m(r,c) << "\n";
                     else
                         out << m(r,c) << ", ";
@@ -1861,10 +1780,7 @@ namespace dlib
 
     class print_matrix_as_csv {};
     const print_matrix_as_csv csv = print_matrix_as_csv();
-    inline print_matrix_as_csv_helper operator<< (
-        std::ostream& out,
-        const print_matrix_as_csv& 
-    )
+    inline print_matrix_as_csv_helper operator<< (std::ostream& out, const print_matrix_as_csv&)
     {
         return print_matrix_as_csv_helper(out);
     }
@@ -1876,9 +1792,7 @@ namespace dlib
     template <typename EXP>
     class const_temp_matrix;
 
-    template <
-        typename EXP
-        >
+    template <typename EXP>
     struct matrix_traits<const_temp_matrix<EXP> >
     {
         typedef typename EXP::type type;
@@ -1902,40 +1816,25 @@ namespace dlib
         const static long NC = matrix_traits<const_temp_matrix>::NC;
         const static long cost = matrix_traits<const_temp_matrix>::cost;
 
-        const_temp_matrix (
-            const matrix_exp<EXP>& item
-        ) :
-            ref_(item.ref())
-        {}
-        const_temp_matrix (
-            const EXP& item
-        ) :
-            ref_(item)
+        const_temp_matrix (const matrix_exp<EXP>& item) : ref_(item.ref())
         {}
 
-        const_ret_type operator() (
-            long r, 
-            long c
-        ) const { return ref_(r,c); }
+        const_temp_matrix (const EXP& item) : ref_(item)
+        {}
 
-        const_ret_type operator() ( long i ) const 
-        { return ref_(i); }
+        const_ret_type operator() (long r, long c) const { return ref_(r,c); }
 
-        template <typename U>
-        bool aliases (
-            const matrix_exp<U>& item
-        ) const { return ref_.aliases(item); }
+        const_ret_type operator() ( long i ) const { return ref_(i); }
 
         template <typename U>
-        bool destructively_aliases (
-            const matrix_exp<U>& item
-        ) const { return ref_.destructively_aliases(item); }
+        bool aliases (const matrix_exp<U>& item) const { return ref_.aliases(item); }
 
-        long nr (
-        ) const { return ref_.nr(); }
+        template <typename U>
+        bool destructively_aliases (const matrix_exp<U>& item) const { return ref_.destructively_aliases(item); }
 
-        long nc (
-        ) const { return ref_.nc(); }
+        long nr () const { return ref_.nr(); }
+
+        long nc () const { return ref_.nc(); }
 
     private:
 

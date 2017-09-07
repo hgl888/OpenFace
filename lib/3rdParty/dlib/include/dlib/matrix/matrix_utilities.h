@@ -281,12 +281,8 @@ namespace dlib
  
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename EXP
-        >
-    const typename matrix_exp<EXP>::type length_squared (
-        const matrix_exp<EXP>& m
-    )
+    template <typename EXP>
+    const typename matrix_exp<EXP>::type length_squared (const matrix_exp<EXP>& m)
     {
         DLIB_ASSERT(is_vector(m) == true, 
             "\ttype length_squared(const matrix_exp& m)"

@@ -12,9 +12,7 @@
 namespace dlib
 {
 
-    template <
-        typename pixel_type
-        >
+    template <typename pixel_type>
     class cv_image
     {
     public:
@@ -129,12 +127,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename T
-        >
-    const matrix_op<op_array2d_to_mat<cv_image<T> > > mat (
-        const cv_image<T>& m 
-    )
+    template <typename T>
+    const matrix_op<op_array2d_to_mat<cv_image<T> > > mat (const cv_image<T>& m)
     {
         typedef op_array2d_to_mat<cv_image<T> > op;
         return matrix_op<op>(op(m));
@@ -156,9 +150,7 @@ namespace dlib
     inline long num_columns( const cv_image<T>& img) { return img.nc(); }
 
     template <typename T>
-    inline void* image_data(
-        cv_image<T>& img
-    )
+    inline void* image_data(cv_image<T>& img)
     {
         if (img.size() != 0)
             return &img[0][0];
@@ -167,9 +159,7 @@ namespace dlib
     }
 
     template <typename T>
-    inline const void* image_data(
-        const cv_image<T>& img
-    )
+    inline const void* image_data(const cv_image<T>& img)
     {
         if (img.size() != 0)
             return &img[0][0];
@@ -178,9 +168,7 @@ namespace dlib
     }
 
     template <typename T>
-    inline long width_step(
-        const cv_image<T>& img
-    ) 
+    inline long width_step(const cv_image<T>& img)
     { 
         return img.width_step(); 
     }

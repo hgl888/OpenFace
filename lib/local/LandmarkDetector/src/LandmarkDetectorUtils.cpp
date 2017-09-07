@@ -1387,7 +1387,8 @@ bool DetectFacesHOG(vector<cv::Rect_<double> >& o_regions, const cv::Mat_<uchar>
 	o_regions.resize(face_detections.size());
 	o_confidences.resize(face_detections.size());
 
-	for( size_t face = 0; face < o_regions.size(); ++face)
+	int isize = o_regions.size();
+	for( size_t face = 0; face < isize; ++face)
 	{
 		// CLNF expects the bounding box to encompass from eyebrow to chin in y, and from cheeck outline to cheeck outline in x, so we need to compensate
 

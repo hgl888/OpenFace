@@ -41,21 +41,19 @@ namespace dlib
 
         typedef typename image_scanner_type::feature_vector_type feature_vector_type;
 
-        void init (
-            const image_scanner_type& 
-        ) 
         /*!
-            requires
-                - w has already been assigned its value.  Note that the point of this
-                  function is to allow an image scanner to overload the
-                  processed_weight_vector template and provide some different kind of
-                  object as the output of get_detect_argument().  For example, the
-                  scan_fhog_pyramid object uses an overload that causes
-                  get_detect_argument() to return the special fhog_filterbank object
-                  instead of a feature_vector_type.  This avoids needing to construct the
-                  fhog_filterbank during each call to detect and therefore speeds up
-                  detection.
-        !*/
+    requires
+        - w has already been assigned its value.  Note that the point of this
+          function is to allow an image scanner to overload the
+          processed_weight_vector template and provide some different kind of
+          object as the output of get_detect_argument().  For example, the
+          scan_fhog_pyramid object uses an overload that causes
+          get_detect_argument() to return the special fhog_filterbank object
+          instead of a feature_vector_type.  This avoids needing to construct the
+          fhog_filterbank during each call to detect and therefore speeds up
+          detection.
+!*/
+        void init (const image_scanner_type&)
         {}
 
         // return the first argument to image_scanner_type::detect()
@@ -66,137 +64,71 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type_
-        >
+    template <typename image_scanner_type_>
     class object_detector
     {
     public:
         typedef image_scanner_type_ image_scanner_type;
         typedef typename image_scanner_type::feature_vector_type feature_vector_type;
 
-        object_detector (
-        );
+        object_detector ();
 
-        object_detector (
-            const object_detector& item 
-        );
+        object_detector (const object_detector& item);
 
-        object_detector (
-            const image_scanner_type& scanner_, 
-            const test_box_overlap& overlap_tester_,
-            const feature_vector_type& w_ 
-        );
+        object_detector (const image_scanner_type& scanner_, const test_box_overlap& overlap_tester_, const feature_vector_type& w_);
 
-        object_detector (
-            const image_scanner_type& scanner_, 
-            const test_box_overlap& overlap_tester_,
-            const std::vector<feature_vector_type>& w_ 
-        );
+        object_detector (const image_scanner_type& scanner_, const test_box_overlap& overlap_tester_,
+                         const std::vector<feature_vector_type>& w_);
 
-        explicit object_detector (
-            const std::vector<object_detector>& detectors
-        );
+        explicit object_detector (const std::vector<object_detector>& detectors);
 
-        unsigned long num_detectors (
-        ) const { return w.size(); }
+        unsigned long num_detectors () const { return w.size(); }
 
-        const feature_vector_type& get_w (
-            unsigned long idx = 0
-        ) const { return w[idx].w; }
+        const feature_vector_type& get_w (unsigned long idx = 0) const { return w[idx].w; }
         
-        const processed_weight_vector<image_scanner_type>& get_processed_w (
-            unsigned long idx = 0
-        ) const { return w[idx]; }
+        const processed_weight_vector<image_scanner_type>& get_processed_w (unsigned long idx = 0) const { return w[idx]; }
 
-        const test_box_overlap& get_overlap_tester (
-        ) const;
+        const test_box_overlap& get_overlap_tester () const;
 
-        const image_scanner_type& get_scanner (
-        ) const;
+        const image_scanner_type& get_scanner () const;
 
-        object_detector& operator= (
-            const object_detector& item 
-        );
+        object_detector& operator= (const object_detector& item);
 
-        template <
-            typename image_type
-            >
-        std::vector<rectangle> operator() (
-            const image_type& img,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        std::vector<rectangle> operator() (const image_type& img, double adjust_threshold = 0);
 
-        template <
-            typename image_type
-            >
-        void operator() (
-            const image_type& img,
-            std::vector<std::pair<double, rectangle> >& final_dets,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        void operator() (const image_type& img, std::vector<std::pair<double, rectangle> >& final_dets, double adjust_threshold = 0);
 
-        template <
-            typename image_type
-            >
-        void operator() (
-            const image_type& img,
-            std::vector<std::pair<double, full_object_detection> >& final_dets,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        void operator() (const image_type& img, std::vector<std::pair<double, full_object_detection> >& final_dets, double adjust_threshold = 0);
 
-        template <
-            typename image_type
-            >
-        void operator() (
-            const image_type& img,
-            std::vector<full_object_detection>& final_dets,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        void operator() (const image_type& img, std::vector<full_object_detection>& final_dets, double adjust_threshold = 0);
 
         // These typedefs are here for backwards compatibility with previous versions of
         // dlib.
         typedef ::dlib::rect_detection rect_detection;
         typedef ::dlib::full_detection full_detection;
 
-        template <
-            typename image_type
-            >
-        void operator() (
-            const image_type& img,
-            std::vector<rect_detection>& final_dets,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        void operator() (const image_type& img, std::vector<rect_detection>& final_dets, double adjust_threshold = 0);
 
-        template <
-            typename image_type
-            >
-        void operator() (
-            const image_type& img,
-            std::vector<full_detection>& final_dets,
-            double adjust_threshold = 0
-        );
+        template <typename image_type>
+        void operator() (const image_type& img, std::vector<full_detection>& final_dets, double adjust_threshold = 0);
 
         template <typename T>
-        friend void serialize (
-            const object_detector<T>& item,
-            std::ostream& out
-        );
+        friend void serialize (const object_detector<T>& item, std::ostream& out);
 
         template <typename T>
-        friend void deserialize (
-            object_detector<T>& item,
-            std::istream& in 
-        );
+        friend void deserialize (object_detector<T>& item, std::istream& in);
 
     public:
 
-        bool overlaps_any_box (
-            const std::vector<rect_detection>& rects,
-            const dlib::rectangle& rect
-        ) const
+        bool overlaps_any_box (const std::vector<rect_detection>& rects, const dlib::rectangle& rect) const
         {
-            for (unsigned long i = 0; i < rects.size(); ++i)
+			unsigned long isize = rects.size();
+            for (unsigned long i = 0; i < isize; ++i)
             {
                 if (boxes_overlap(rects[i].rect, rect))
                     return true;
@@ -212,10 +144,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <typename T>
-    void serialize (
-        const object_detector<T>& item,
-        std::ostream& out
-    )
+    void serialize (const object_detector<T>& item, std::ostream& out)
     {
         int version = 2;
         serialize(version, out);
@@ -226,17 +155,15 @@ namespace dlib
         serialize(item.boxes_overlap, out);
         // serialize all the weight vectors
         serialize(item.w.size(), out);
-        for (unsigned long i = 0; i < item.w.size(); ++i)
+		unsigned long isize = item.w.size();
+        for (unsigned long i = 0; i < isize; ++i)
             serialize(item.w[i].w, out);
     }
 
 // ----------------------------------------------------------------------------------------
 
     template <typename T>
-    void deserialize (
-        object_detector<T>& item,
-        std::istream& in 
-    )
+    void deserialize (object_detector<T>& item, std::istream& in)
     {
         int version = 0;
         deserialize(version, in);
@@ -273,24 +200,15 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>::
-    object_detector (
-    )
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>::object_detector ()
     {
     }
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>::
-    object_detector (
-        const object_detector& item 
-    )
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>::object_detector (const object_detector& item)
     {
         boxes_overlap = item.boxes_overlap;
         w = item.w;
@@ -299,16 +217,9 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>::
-    object_detector (
-        const image_scanner_type& scanner_, 
-        const test_box_overlap& overlap_tester,
-        const feature_vector_type& w_ 
-    ) :
-        boxes_overlap(overlap_tester)
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>::object_detector (const image_scanner_type& scanner_, const test_box_overlap& overlap_tester,
+                                                          const feature_vector_type& w_) :boxes_overlap(overlap_tester)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT(scanner_.get_num_detection_templates() > 0 &&
@@ -329,16 +240,9 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>::
-    object_detector (
-        const image_scanner_type& scanner_, 
-        const test_box_overlap& overlap_tester,
-        const std::vector<feature_vector_type>& w_ 
-    ) :
-        boxes_overlap(overlap_tester)
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>::object_detector (const image_scanner_type& scanner_, const test_box_overlap& overlap_tester,
+                                                          const std::vector<feature_vector_type>& w_) :boxes_overlap(overlap_tester)
     {
         // make sure requires clause is not broken
         DLIB_ASSERT(scanner_.get_num_detection_templates() > 0 && w_.size() > 0,
@@ -374,13 +278,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>::
-    object_detector (
-        const std::vector<object_detector>& detectors
-    )
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>::object_detector (const std::vector<object_detector>& detectors)
     {
         DLIB_ASSERT(detectors.size() != 0,
                 "\t object_detector::object_detector(detectors)"
@@ -388,10 +287,12 @@ namespace dlib
                 << "\n\t this: " << this
         );
         std::vector<feature_vector_type> weights;
-        weights.reserve(detectors.size());
-        for (unsigned long i = 0; i < detectors.size(); ++i)
+		unsigned long isize = detectors.size();
+        weights.reserve(isize);
+        for (unsigned long i = 0; i < isize; ++i)
         {
-            for (unsigned long j = 0; j < detectors[i].num_detectors(); ++j)
+			unsigned long jsize = detectors[i].num_detectors();
+            for (unsigned long j = 0; j < jsize; ++j)
                 weights.push_back(detectors[i].get_w(j));
         }
 
@@ -400,13 +301,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    object_detector<image_scanner_type>& object_detector<image_scanner_type>::
-    operator= (
-        const object_detector& item 
-    )
+    template <typename image_scanner_type>
+    object_detector<image_scanner_type>& object_detector<image_scanner_type>::operator= (const object_detector& item)
     {
         if (this == &item)
             return *this;
@@ -419,27 +315,21 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    void object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        std::vector<rect_detection>& final_dets,
-        double adjust_threshold
-    ) 
+    template <typename image_scanner_type>
+    template <typename image_type>
+    void object_detector<image_scanner_type>::operator() (const image_type& img, std::vector<rect_detection>& final_dets,
+                                                          double adjust_threshold)
     {
         scanner.load(img);
         std::vector<std::pair<double, rectangle> > dets;
         std::vector<rect_detection> dets_accum;
-        for (unsigned long i = 0; i < w.size(); ++i)
+		unsigned long isize = w.size();
+        for (unsigned long i = 0; i < isize; ++i)
         {
             const double thresh = w[i].w(scanner.get_num_dimensions());
             scanner.detect(w[i].get_detect_argument(), dets, thresh + adjust_threshold);
-            for (unsigned long j = 0; j < dets.size(); ++j)
+			unsigned long jsize = dets.size();
+            for (unsigned long j = 0; j < jsize; ++j)
             {
                 rect_detection temp;
                 temp.detection_confidence = dets[j].first-thresh;
@@ -453,7 +343,8 @@ namespace dlib
         final_dets.clear();
         if (w.size() > 1)
             std::sort(dets_accum.rbegin(), dets_accum.rend());
-        for (unsigned long i = 0; i < dets_accum.size(); ++i)
+		isize = dets_accum.size();
+        for (unsigned long i = 0; i < isize; ++i)
         {
             if (overlaps_any_box(final_dets, dets_accum[i].rect))
                 continue;
@@ -464,26 +355,19 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    void object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        std::vector<full_detection>& final_dets,
-        double adjust_threshold 
-    )
+    template <typename image_scanner_type>
+    template <typename image_type>
+    void object_detector<image_scanner_type>::operator() (const image_type& img, std::vector<full_detection>& final_dets,
+                                                          double adjust_threshold)
     {
         std::vector<rect_detection> dets;
         (*this)(img,dets,adjust_threshold);
 
-        final_dets.resize(dets.size());
+		unsigned long isize = dets.size();
+        final_dets.resize(isize);
 
         // convert all the rectangle detections into full_object_detections.
-        for (unsigned long i = 0; i < dets.size(); ++i)
+        for (unsigned long i = 0; i < isize; ++i)
         {
             final_dets[i].detection_confidence = dets[i].detection_confidence;
             final_dets[i].weight_index = dets[i].weight_index;
@@ -493,23 +377,16 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    std::vector<rectangle> object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        double adjust_threshold
-    ) 
+    template <typename image_scanner_type>
+    template <typename image_type>
+    std::vector<rectangle> object_detector<image_scanner_type>::operator() (const image_type& img, double adjust_threshold)
     {
         std::vector<rect_detection> dets;
         (*this)(img,dets,adjust_threshold);
 
-        std::vector<rectangle> final_dets(dets.size());
-        for (unsigned long i = 0; i < dets.size(); ++i)
+		unsigned long isize = dets.size();
+        std::vector<rectangle> final_dets(isize);
+        for (unsigned long i = 0; i < isize; ++i)
             final_dets[i] = dets[i].rect;
 
         return final_dets;
@@ -517,79 +394,58 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    void object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        std::vector<std::pair<double, rectangle> >& final_dets,
-        double adjust_threshold
-    ) 
+    template <typename image_scanner_type>
+    template <typename image_type>
+    void object_detector<image_scanner_type>::operator() (const image_type& img, std::vector<std::pair<double, rectangle> >& final_dets,
+                                                          double adjust_threshold)
     {
         std::vector<rect_detection> dets;
         (*this)(img,dets,adjust_threshold);
 
-        final_dets.resize(dets.size());
-        for (unsigned long i = 0; i < dets.size(); ++i)
+		unsigned long isize = dets.size();
+        final_dets.resize(isize);
+        for (unsigned long i = 0; i < isize; ++i)
             final_dets[i] = std::make_pair(dets[i].detection_confidence,dets[i].rect);
     }
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    void object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        std::vector<std::pair<double, full_object_detection> >& final_dets,
-        double adjust_threshold
-    ) 
+    template <typename image_scanner_type>
+    template <typename image_type>
+    void object_detector<image_scanner_type>::operator() (const image_type& img,
+          std::vector<std::pair<double, full_object_detection> >& final_dets, double adjust_threshold)
     {
         std::vector<rect_detection> dets;
         (*this)(img,dets,adjust_threshold);
 
         final_dets.clear();
-        final_dets.reserve(dets.size());
+		unsigned long isize = dets.size();
+        final_dets.reserve(isize);
 
         // convert all the rectangle detections into full_object_detections.
-        for (unsigned long i = 0; i < dets.size(); ++i)
+        for (unsigned long i = 0; i < isize; ++i)
         {
-            final_dets.push_back(std::make_pair(dets[i].detection_confidence, 
+            final_dets.push_back(std::make_pair(dets[i].detection_confidence,
                                                 scanner.get_full_object_detection(dets[i].rect, w[dets[i].weight_index].w)));
         }
     }
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    template <
-        typename image_type
-        >
-    void object_detector<image_scanner_type>::
-    operator() (
-        const image_type& img,
-        std::vector<full_object_detection>& final_dets,
-        double adjust_threshold
-    ) 
+    template <typename image_scanner_type>
+    template <typename image_type>
+    void object_detector<image_scanner_type>::operator() (const image_type& img, std::vector<full_object_detection>& final_dets,
+                                                          double adjust_threshold)
     {
         std::vector<rect_detection> dets;
         (*this)(img,dets,adjust_threshold);
 
         final_dets.clear();
-        final_dets.reserve(dets.size());
+		unsigned long isize = dets.size();
+        final_dets.reserve(isize);
 
         // convert all the rectangle detections into full_object_detections.
-        for (unsigned long i = 0; i < dets.size(); ++i)
+        for (unsigned long i = 0; i < isize; ++i)
         {
             final_dets.push_back(scanner.get_full_object_detection(dets[i].rect, w[dets[i].weight_index].w));
         }
@@ -597,24 +453,16 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    const test_box_overlap& object_detector<image_scanner_type>::
-    get_overlap_tester (
-    ) const
+    template <typename image_scanner_type>
+    const test_box_overlap& object_detector<image_scanner_type>::get_overlap_tester () const
     {
         return boxes_overlap;
     }
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename image_scanner_type
-        >
-    const image_scanner_type& object_detector<image_scanner_type>::
-    get_scanner (
-    ) const
+    template <typename image_scanner_type>
+    const image_scanner_type& object_detector<image_scanner_type>::get_scanner () const
     {
         return scanner;
     }

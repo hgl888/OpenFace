@@ -192,14 +192,8 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename P1,
-        typename P2  
-        >
-    inline void assign_pixel (
-        P1& dest,
-        const P2& src
-    );
+    template <typename P1, typename P2>
+    inline void assign_pixel (P1& dest, const P2& src);
     /*!
         requires
             - pixel_traits<P1> must be defined
@@ -960,10 +954,9 @@ namespace dlib
     // -----------------------------
 
     template < typename P1, typename P2 >
-    inline void assign_pixel (
-        P1& dest,
-        const P2& src
-    ) { assign_pixel_helpers::assign(dest,src); }
+    inline void assign_pixel (P1& dest, const P2& src) {
+        assign_pixel_helpers::assign(dest,src);
+    }
 
 // ----------------------------------------------------------------------------------------
 
