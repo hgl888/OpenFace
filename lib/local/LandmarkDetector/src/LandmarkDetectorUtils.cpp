@@ -1376,9 +1376,9 @@ bool DetectFacesHOG(vector<cv::Rect_<double> >& o_regions, const cv::Mat_<uchar>
 
 	double scaling = 1.0;
 
-	cv::resize(intensity, upsampled_intensity, cv::Size((int)(intensity.cols * scaling), (int)(intensity.rows * scaling)));
+	//cv::resize(intensity, upsampled_intensity, cv::Size((int)(intensity.cols * scaling), (int)(intensity.rows * scaling)));
 
-	dlib::cv_image<uchar> cv_grayscale(upsampled_intensity);
+	dlib::cv_image<uchar> cv_grayscale(intensity);
 
 	std::vector<dlib::full_detection> face_detections;
 	detector(cv_grayscale, face_detections, -0.2);

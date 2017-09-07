@@ -54,3 +54,5 @@ matlab_version/face_validation/trained/intermediate/
 .vs/
 exe/Facedetection/Debug/
 *.opendb
+.idea/
+cmake-build-debug/

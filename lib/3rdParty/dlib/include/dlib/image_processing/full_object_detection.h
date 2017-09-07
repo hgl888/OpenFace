@@ -21,23 +21,19 @@ namespace dlib
     class full_object_detection
     {
     public:
-        full_object_detection(
-            const rectangle& rect_,
-            const std::vector<point>& parts_
-        ) : rect(rect_), parts(parts_) {}
+        full_object_detection( const rectangle& rect_, const std::vector<point>& parts_  ) 
+			: rect(rect_), parts(parts_)
+		{}
 
         full_object_detection(){}
 
-        explicit full_object_detection(
-            const rectangle& rect_
-        ) : rect(rect_) {}
+        explicit full_object_detection( const rectangle& rect_)
+			: rect(rect_) {}
 
         const rectangle& get_rect() const { return rect; }
         unsigned long num_parts() const { return parts.size(); }
 
-        const point& part(
-            unsigned long idx
-        ) const 
+        const point& part( unsigned long idx) const 
         { 
             // make sure requires clause is not broken
             DLIB_ASSERT(idx < num_parts(),
@@ -50,10 +46,7 @@ namespace dlib
             return parts[idx]; 
         }
 
-        friend void serialize (
-            const full_object_detection& item,
-            std::ostream& out
-        )
+        friend void serialize ( const full_object_detection& item, std::ostream& out)
         {
             int version = 1;
             serialize(version, out);
@@ -61,10 +54,7 @@ namespace dlib
             serialize(item.parts, out);
         }
 
-        friend void deserialize (
-            full_object_detection& item,
-            std::istream& in
-        )
+        friend void deserialize (full_object_detection& item,std::istream& in)
         {
             int version = 0;
             deserialize(version, in);
@@ -82,9 +72,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    inline bool all_parts_in_rect (
-        const full_object_detection& obj
-    )
+    inline bool all_parts_in_rect ( const full_object_detection& obj )
     {
         for (unsigned long i = 0; i < obj.num_parts(); ++i)
         {

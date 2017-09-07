@@ -403,7 +403,7 @@ namespace dlib
             padding = 1;
             window_width = 64;
             window_height = 64;
-            max_pyramid_levels = 1000;
+            max_pyramid_levels = 100;
             min_pyramid_layer_width = 64;
             min_pyramid_layer_height = 64;
             nuclear_norm_regularization_strength = 0;
@@ -687,8 +687,9 @@ namespace dlib
                 pyr(img, temp1);
                 fe(temp1, feats[1], cell_size,filter_rows_padding,filter_cols_padding);
                 swap(temp1,temp2);
-
-                for (unsigned long i = 2; i < feats.size(); ++i)
+				
+				int ilen = feats.size();
+                for (unsigned long i = 2; i < ilen; ++i)
                 {
                     pyr(temp2, temp1);
                     fe(temp1, feats[i], cell_size,filter_rows_padding,filter_cols_padding);
@@ -767,27 +768,19 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    template <
-        typename Pyramid_type,
-        typename feature_extractor_type
-        >
-    template <
-        typename image_type
-        >
-    void scan_fhog_pyramid<Pyramid_type,feature_extractor_type>::
-    load (
-        const image_type& img
-    )
+    template < typename Pyramid_type, typename feature_extractor_type >
+    template <  typename image_type  >
+    void scan_fhog_pyramid<Pyramid_type,feature_extractor_type>:: load (const image_type& img )
     {
         unsigned long width, height;
         compute_fhog_window_size(width,height);
-        //impl::create_fhog_pyramid<Pyramid_type>(img, fe, feats, cell_size, height,
-        //    width, min_pyramid_layer_width, min_pyramid_layer_height,
-        //    max_pyramid_levels);
+		impl::create_fhog_pyramid<Pyramid_type>(img, fe, feats, cell_size, height,
+			width, min_pyramid_layer_width, min_pyramid_layer_height,
+			max_pyramid_levels);
 
-		impl::create_fhog_pyramid_parallel<Pyramid_type>(img, fe, feats, cell_size, height,
-            width, min_pyramid_layer_width, min_pyramid_layer_height,
-            max_pyramid_levels);
+		//impl::create_fhog_pyramid_parallel<Pyramid_type>(img, fe, feats, cell_size, height,
+  //          width, min_pyramid_layer_width, min_pyramid_layer_height,
+  //          max_pyramid_levels);
 
     }
 

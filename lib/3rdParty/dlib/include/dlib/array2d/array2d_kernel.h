@@ -11,10 +11,7 @@
 
 namespace dlib
 {
-    template <
-        typename T,
-        typename mem_manager = default_memory_manager
-        >
+    template < typename T, typename mem_manager = default_memory_manager >
     class array2d : public enumerable<T>
     {
 

@@ -360,9 +360,11 @@ namespace dlib
             // later on.  So some statements assign to the boundary but those values are
             // never used.
             array2d<matrix<float,18,1> > hist(cells_nr+2, cells_nc+2);
-            for (long r = 0; r < hist.nr(); ++r)
+			int nr = hist.nr();
+			int nc = hist.nc();
+            for (long r = 0; r < nr; ++r)
             {
-                for (long c = 0; c < hist.nc(); ++c)
+                for (long c = 0; c < nc; ++c)
                 {
                     hist[r][c] = 0;
                 }
