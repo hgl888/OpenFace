@@ -291,7 +291,7 @@ void create_display_image(const cv::Mat& orig, cv::Mat& display_image, LandmarkD
 						
 }
 
-int main (int argc, char **argv)
+int main_face(int argc, char **argv)
 {
 		
 	//Convert arguments to more convenient vector form
