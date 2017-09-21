@@ -262,11 +262,12 @@ void FaceModelParameters::init()
 	reinit_video_every = 4;
 
 	// Face detection
-	face_detector_location = "classifiers/haarcascade_frontalface_alt.xml";
+	face_detector_location = "classifiers/haarcascade_frontalface_default.xml";
 	quiet_mode = false;
 
 	// By default use HOG SVM
-	curr_face_detector = HOG_SVM_DETECTOR;
+	//curr_face_detector = HOG_SVM_DETECTOR;
+	curr_face_detector = HAAR_DETECTOR;
 
 	// The gaze tracking has to be explicitly initialised
 	track_gaze = false;

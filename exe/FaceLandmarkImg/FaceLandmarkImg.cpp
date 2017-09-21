@@ -404,8 +404,10 @@ int main (int argc, char **argv)
 		
 		// Making sure the image is in uchar grayscale
 		cv::Mat_<uchar> grayscale_image;
-		convert_to_grayscale(read_image, grayscale_image);
-		
+		//convert_to_grayscale(read_image, grayscale_image);
+
+		cvtColor(read_image, grayscale_image, CV_BGR2GRAY);
+		equalizeHist(grayscale_image, grayscale_image);
 		//cv::Size dsize = cv::Size(grayscale_image.cols * 0.5, grayscale_image.rows * 0.5);
 		//cv::Mat resize_img = cv::Mat(dsize, CV_8U);
 		//cv::resize(grayscale_image, resize_image);
@@ -434,7 +436,7 @@ int main (int argc, char **argv)
 			
 			// Detect faces in an image
 			vector<cv::Rect_<double> > face_detections;
-
+			std::vector<cv::Rect> faces;
 			if (det_parameters.curr_face_detector == LandmarkDetector::FaceModelParameters::HOG_SVM_DETECTOR)
 			{
 				vector<double> confidences;
@@ -443,6 +445,7 @@ int main (int argc, char **argv)
 			else
 			{
 				LandmarkDetector::DetectFaces(face_detections, grayscale_image, classifier);
+				//classifier.detectMultiScale(grayscale_image, faces, 1.2, 2, 0 | CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(20, 20));
 			}
 
 			// Detect landmarks around detected faces
